@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Uaskus Tweaker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">Uaskus Tweaker</a>
+            <ul class="nav-links">
+                <li><a href="index.html#features">Features</a></li>
+                <li><a href="guide.html">Guide</a></li>
+                <li><a href="index.html#download">Download</a></li>
+                <li><a href="aboutme.html">About Me</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Checkout Section -->
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <h1>💎 Support Uaskus Tweaker</h1>
+            <p>Choose a plan to support development and get premium features</p>
+        </div>
+
+        <!-- Stripe Pricing Table -->
+        <!-- 
+            To set this up:
+            1. Go to https://dashboard.stripe.com/pricing-tables
+            2. Create a new pricing table with your products
+            3. Copy your pricing-table-id and publishable-key below
+        -->
+        <stripe-pricing-table 
+            pricing-table-id="prctbl_YOUR_PRICING_TABLE_ID"
+            publishable-key="pk_live_YOUR_PUBLISHABLE_KEY">
+        </stripe-pricing-table>
+
+        <div class="free-download">
+            <p>Looking for the free version? <a href="index.html#download">Download it here</a></p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+        </div>
+        <p class="copyright">© 2026 Uaskus Tweaker. All rights reserved.</p>
+    </footer>
+</body>
+</html>

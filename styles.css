@@ -420,6 +420,297 @@ footer {
     font-size: 0.875rem;
 }
 
+/* About Page */
+.about-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.about-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.about-header p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.about-section {
+    background: var(--dark-light);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.about-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--accent);
+}
+
+.about-section p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+.about-section ul {
+    list-style: none;
+    color: var(--text-muted);
+}
+
+.about-section li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.about-section li::before {
+    content: "▹";
+    color: var(--accent);
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.social-link {
+    padding: 0.75rem 1.5rem;
+    background: var(--dark-light);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.social-link:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Checkout Page Styles */
+.checkout-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+}
+
+.checkout-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.checkout-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.checkout-header p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+/* Pricing Grid */
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.pricing-card {
+    background: var(--dark-light);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+}
+
+.pricing-card.featured {
+    border: 2px solid var(--primary);
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, var(--dark-light) 100%);
+}
+
+.popular-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.pricing-header {
+    text-align: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    margin-bottom: 1.5rem;
+}
+
+.pricing-header h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+.price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.price .currency {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+}
+
+.price .amount {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.price .period {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.pricing-features {
+    list-style: none;
+    margin-bottom: 2rem;
+}
+
+.pricing-features li {
+    padding: 0.75rem 0;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pricing-features li:last-child {
+    border-bottom: none;
+}
+
+.pricing-card .btn {
+    width: 100%;
+    text-align: center;
+}
+
+/* Payment Info */
+.payment-info {
+    text-align: center;
+    padding: 2rem;
+    background: var(--dark-light);
+    border-radius: 12px;
+    margin-bottom: 3rem;
+}
+
+.payment-info p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.payment-icons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.payment-icons span {
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+/* Donation Section */
+.donation-section {
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.donation-section h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.donation-section > p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.donation-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.donation-btn {
+    padding: 1rem 2rem;
+    background: var(--dark-light);
+    border: 2px solid var(--primary);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.donation-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .hero h1 {
@@ -432,5 +723,27 @@ footer {
 
     .features-grid {
         grid-template-columns: 1fr;
+    }
+
+    .pricing-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .checkout-header h1 {
+        font-size: 2rem;
+    }
+
+    .price .amount {
+        font-size: 2.5rem;
+    }
+
+    .donation-options {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .donation-btn {
+        width: 100%;
+        max-width: 200px;
     }
 }
