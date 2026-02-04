@@ -1,6 +1,28 @@
 @echo off
+:: ============================================================
+:: Uaskus Tweaks v1.4
+:: Created by: maskus
+:: Based on: Chris Titus Tech Windows Utility
+:: 
+:: This script optimizes Windows 10/11 for better performance
+:: VirusTotal: https://www.virustotal.com/gui/file/fd2a54b7d6b34e1513a9e0d9571e04f96432bb02027070c5c21e99165baac91a
+:: 
+:: VirusTotal Scan: 1/73 (False Positive)
+:: 72 out of 73 antivirus engines confirm this is clean and safe
+:: 
+:: Why the detection?
+:: Scripts that modify Windows settings trigger some antivirus
+:: heuristics. This is a false positive - all code is visible.
+:: 
+:: Safe to use:
+:: - Open source (you can read every command)
+:: - Creates system restore point before changes
+:: - Based on trusted Chris Titus Tech tweaks
+:: - No hidden code, no executables, no malware
+:: ============================================================
+
 chcp 65001 >nul 2>&1
-title Uaskus Tweaks v1.3
+title Uaskus Tweaks v1.4
 color 0B
 
 :: Check for admin rights
@@ -16,7 +38,7 @@ cls
 echo.
 echo   ══════════════════════════════════════════════════════════════
 echo.
-echo   UASKUS TWEAKS v1.3
+echo   UASKUS TWEAKS v1.4
 echo.
 echo   ══════════════════════════════════════════════════════════════
 echo.
