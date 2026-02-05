@@ -80,7 +80,7 @@ echo      ██║   ╚███╔███╔╝███████╗█�
 echo      ╚═╝    ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
 echo.
 echo                       Created by: maskus
-echo                       Version: 1.3
+echo                       Version: 1.4
 echo   ════════════════════════════════════════════════════════════
 echo.
 echo.
