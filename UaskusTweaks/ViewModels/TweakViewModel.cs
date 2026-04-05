@@ -26,7 +26,7 @@ public class TweakViewModel : BaseViewModel
         set => SetProperty(ref _isSelected, value);
     }
 
-    public Brush RiskColor => RiskLevel switch
+    public System.Windows.Media.Brush RiskColor => RiskLevel switch
     {
         RiskLevel.Low => new SolidColorBrush(Color.FromRgb(0x4a, 0xde, 0x80)),
         RiskLevel.Medium => new SolidColorBrush(Color.FromRgb(0xfa, 0xcc, 0x15)),
