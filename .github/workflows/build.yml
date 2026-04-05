@@ -43,28 +43,32 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
+          cat > release-notes.md <<'EOF'
+          ## Uaskus Tweaker v2.0.0 - WPF Edition
+
+          Modern WPF GUI application replacing the original batch-file tool.
+
+          ### What's New
+          - Professional dark-themed graphical interface
+          - One-click performance, privacy, and gaming optimizations
+          - 100+ Windows tweaks with descriptions and risk indicators
+          - Automatic system restore point creation before applying changes
+          - Built-in logging and undo support
+
+          ### Requirements
+          - Windows 10 or Windows 11 (64-bit)
+          - Administrator privileges
+          - No additional runtime required (self-contained executable)
+
+          ### How to Use
+          1. Download **UaskusTweaks.exe**
+          2. Right-click → **Run as administrator**
+          3. Select the tweaks you want to apply and click **Apply**
+          EOF
+
           gh release delete v2.0.0 --yes 2>/dev/null || true
           git push origin :refs/tags/v2.0.0 2>/dev/null || true
           gh release create v2.0.0 publish/UaskusTweaks.exe \
             --title "Uaskus Tweaker v2.0.0 - WPF Edition" \
-            --notes "## Uaskus Tweaker v2.0.0 - WPF Edition
-
-Modern WPF GUI application replacing the original batch-file tool.
-
-### What's New
-- Professional dark-themed graphical interface
-- One-click performance, privacy, and gaming optimizations
-- 100+ Windows tweaks with descriptions and risk indicators
-- Automatic system restore point creation before applying changes
-- Built-in logging and undo support
-
-### Requirements
-- Windows 10 or Windows 11 (64-bit)
-- Administrator privileges
-- No additional runtime required (self-contained executable)
-
-### How to Use
-1. Download **UaskusTweaks.exe**
-2. Right-click → **Run as administrator**
-3. Select the tweaks you want to apply and click **Apply**" \
+            --notes-file release-notes.md \
             --latest
