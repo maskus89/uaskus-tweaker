@@ -9,8 +9,10 @@ public class RestorePointService
         // Enable system restore on C: first (in case it was disabled)
         await _ps.ExecuteAsync("Enable-ComputerRestore -Drive 'C:\\'");
 
-        var cmd = $"Checkpoint-Computer -Description '{description.Replace("'", "\\'")}' -RestorePointType MODIFY_SETTINGS";
-        var (success, output) = await _ps.ExecuteAsync(cmd);
+        // Use double-quoted description; since PowerShellService uses -EncodedCommand,
+        // no additional escaping of the description string is required.
+        var cmd = $"Checkpoint-Computer -Description \"{description}\" -RestorePointType MODIFY_SETTINGS";
+        var (success, _) = await _ps.ExecuteAsync(cmd);
         return success;
     }
 }

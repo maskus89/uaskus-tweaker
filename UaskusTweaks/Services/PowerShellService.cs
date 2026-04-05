@@ -9,9 +9,13 @@ public class PowerShellService
     {
         try
         {
+            // Use -EncodedCommand (Base64 Unicode) to avoid all shell-escaping issues
+            var bytes = Encoding.Unicode.GetBytes(command);
+            var encoded = Convert.ToBase64String(bytes);
+
             var psi = new ProcessStartInfo("powershell.exe")
             {
-                Arguments = $"-NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"{EscapeForArgument(command)}\"",
+                Arguments = $"-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand {encoded}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -38,7 +42,4 @@ public class PowerShellService
             return (false, $"Exception: {ex.Message}");
         }
     }
-
-    private static string EscapeForArgument(string cmd)
-        => cmd.Replace("\"", "\\\"");
 }

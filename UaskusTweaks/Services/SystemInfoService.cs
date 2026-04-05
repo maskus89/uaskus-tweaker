@@ -41,7 +41,7 @@ public class SystemInfoService
 
         try
         {
-            using var ramSearch = new ManagementObjectSearcher("SELECT TotalPhysicalMemory, FreePhysicalMemory FROM Win32_ComputerSystem");
+            using var ramSearch = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
             foreach (ManagementObject obj in ramSearch.Get())
             {
                 var total = Convert.ToDouble(obj["TotalPhysicalMemory"] ?? 0);

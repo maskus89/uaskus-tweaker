@@ -1,8 +1,4 @@
 using System.Windows.Media;
-using Brush = System.Windows.Media.Brush;
-using Brushes = System.Windows.Media.Brushes;
-using SolidColorBrush = System.Windows.Media.SolidColorBrush;
-using Color = System.Windows.Media.Color;
 using UaskusTweaks.Models;
 
 namespace UaskusTweaks.ViewModels;
@@ -36,7 +32,7 @@ public class TweakViewModel : BaseViewModel
         RiskLevel.Medium => new SolidColorBrush(Color.FromRgb(0xfa, 0xcc, 0x15)),
         RiskLevel.High => new SolidColorBrush(Color.FromRgb(0xf9, 0x73, 0x16)),
         RiskLevel.Critical => new SolidColorBrush(Color.FromRgb(0xdc, 0x26, 0x26)),
-        _ => Brushes.Gray
+        _ => System.Windows.Media.Brushes.Gray
     };
 
     public string RiskText => RiskLevel switch

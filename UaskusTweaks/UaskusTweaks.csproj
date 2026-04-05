@@ -14,7 +14,6 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Platforms>x64</Platforms>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Management" Version="8.0.0" />

@@ -257,7 +257,6 @@
                             <TextBlock Text="SYSTEM INFO"
                                        Foreground="{StaticResource BrushAccent}"
                                        FontSize="11" FontWeight="Bold"
-                                       
                                        VerticalAlignment="Center"/>
                         </DockPanel>
                     </Border>
@@ -526,8 +525,7 @@
                         <TextBlock Text="📋 LOG OUTPUT"
                                    Foreground="{StaticResource BrushAccent}"
                                    FontSize="10" FontWeight="Bold"
-                                   VerticalAlignment="Center"
-                                   />
+                                   VerticalAlignment="Center"/>
                     </DockPanel>
                 </Border>
                 <ScrollViewer x:Name="LogScrollViewer"

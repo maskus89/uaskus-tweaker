@@ -46,16 +46,28 @@ public class TweakExecutorService
         if (!Enum.TryParse<RegistryValueKind>(kindStr, out var kind))
             kind = RegistryValueKind.DWord;
 
-        object value = kind switch
+        object value;
+        try
         {
-            RegistryValueKind.DWord => int.TryParse(rawValue, out var iv) ? iv : Convert.ToInt32(rawValue, 16),
-            RegistryValueKind.QWord => long.TryParse(rawValue, out var lv) ? lv : Convert.ToInt64(rawValue, 16),
-            RegistryValueKind.Binary => Convert.FromBase64String(rawValue),
-            RegistryValueKind.String => rawValue,
-            RegistryValueKind.ExpandString => rawValue,
-            RegistryValueKind.MultiString => rawValue.Split('\n'),
-            _ => rawValue
-        };
+            value = kind switch
+            {
+                RegistryValueKind.DWord => int.TryParse(rawValue, out var iv) ? iv
+                    : int.TryParse(rawValue, System.Globalization.NumberStyles.HexNumber, null, out var hiv) ? hiv
+                    : Convert.ToInt32(rawValue, 16),
+                RegistryValueKind.QWord => long.TryParse(rawValue, out var lv) ? lv
+                    : long.TryParse(rawValue, System.Globalization.NumberStyles.HexNumber, null, out var hlv) ? hlv
+                    : Convert.ToInt64(rawValue, 16),
+                RegistryValueKind.Binary => Convert.FromBase64String(rawValue),
+                RegistryValueKind.String => rawValue,
+                RegistryValueKind.ExpandString => rawValue,
+                RegistryValueKind.MultiString => rawValue.Split('\n'),
+                _ => rawValue
+            };
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Failed to parse registry value '{rawValue}' as {kind}: {ex.Message}");
+        }
 
         _registry.SetValue(path, name, value, kind);
         return (true, $"Set {path}\\{name} = {rawValue}");
