@@ -229,28 +229,22 @@
         ══════════════════════════════════════════════════════════════════════ -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="220"/>      <!-- Left sidebar with tabs -->
+                <ColumnDefinition Width="*"/>        <!-- Main content area -->
             </Grid.ColumnDefinitions>
 
-            <!-- ── TWEAK TABS PANEL ── -->
-            <DockPanel Grid.Column="0">
-
-                <!-- Search bar -->
-                <Border DockPanel.Dock="Top"
-                        Background="{StaticResource BrushBg0}"
-                        Padding="12,8"
-                        BorderBrush="{StaticResource BrushBg2}"
-                        BorderThickness="0,0,0,1">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <Button Content="👁 Preview"
-                                    Command="{Binding PreviewCommand}"
-                                    Style="{StaticResource SmallButton}"
-                                    Margin="0,0,8,0"/>
-                            <Button Content="📋 Export Log"
-                                    Command="{Binding ExportLogCommand}"
-                                    Style="{StaticResource SmallButton}"/>
-                        </StackPanel>
+            <!-- LEFT SIDEBAR - Category Buttons -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource BrushBg1}"
+                    BorderBrush="{StaticResource BrushBg2}"
+                    BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <!-- Search bar -->
+                    <Border DockPanel.Dock="Top"
+                            Background="{StaticResource BrushBg0}"
+                            Padding="12,8"
+                            BorderBrush="{StaticResource BrushBg2}"
+                            BorderThickness="0,0,0,1">
                         <Grid>
                             <TextBox x:Name="SearchBox"
                                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
@@ -258,11 +252,11 @@
                                      Foreground="{StaticResource BrushTextPrimary}"
                                      BorderBrush="{StaticResource BrushBg3}"
                                      Padding="10,5"
-                                     FontSize="12"
+                                     FontSize="11"
                                      VerticalAlignment="Center"/>
-                            <TextBlock Text="🔍  Search tweaks…"
+                            <TextBlock Text="🔍 Search…"
                                        Foreground="{StaticResource BrushTextMuted}"
-                                       FontSize="12"
+                                       FontSize="11"
                                        Margin="12,0,0,0"
                                        VerticalAlignment="Center"
                                        IsHitTestVisible="False">
@@ -278,75 +272,98 @@
                                 </TextBlock.Style>
                             </TextBlock>
                         </Grid>
+                    </Border>
+
+                    <!-- Category buttons list -->
+                    <ScrollViewer DockPanel.Dock="Bottom"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl x:Name="CategoryButtonsItemsControl" ItemsSource="{Binding Categories}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:TweakCategoryViewModel}">
+                                    <Button Click="CategoryButton_Click"
+                                            Tag="{Binding}"
+                                            Padding="8,6"
+                                            Margin="5,3"
+                                            Height="75"
+                                            Cursor="Hand">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="{StaticResource BrushBg2}"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource BrushBg3}"/>
+                                                <Setter Property="BorderThickness" Value="1"/>
+                                                <Setter Property="Foreground" Value="{StaticResource BrushTextSecondary}"/>
+                                                <EventSetter Event="MouseEnter" Handler="CategoryButton_MouseEnter"/>
+                                                <EventSetter Event="MouseLeave" Handler="CategoryButton_MouseLeave"/>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding Icon}" FontSize="22" TextAlignment="Center" Margin="0,0,0,2"/>
+                                            <TextBlock Text="{Binding Name}" FontSize="10" TextAlignment="Center" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                            <TextBlock FontSize="8" TextAlignment="Center" Margin="0,2,0,0" Opacity="0.7">
+                                                <Run Text="{Binding SelectedCount, Mode=OneWay}"/>
+                                                <Run Text="/"/>
+                                                <Run Text="{Binding TotalCount, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- RIGHT CONTENT AREA -->
+            <DockPanel Grid.Column="1">
+                <!-- Category header -->
+                <Border DockPanel.Dock="Top"
+                        Background="{StaticResource BrushBg0}"
+                        Padding="14,8"
+                        BorderBrush="{StaticResource BrushBg2}"
+                        BorderThickness="0,0,0,1">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="👁 Preview"
+                                    Command="{Binding PreviewCommand}"
+                                    Style="{StaticResource SmallButton}"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="📋 Export Log"
+                                    Command="{Binding ExportLogCommand}"
+                                    Style="{StaticResource SmallButton}"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="✓ Select All"
+                                    Command="{Binding SelectedCategory.SelectAllCommand}"
+                                    Style="{StaticResource SmallButton}"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="✕ Deselect All"
+                                    Command="{Binding SelectedCategory.DeselectAllCommand}"
+                                    Style="{StaticResource SmallButton}"/>
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock>
+                                <Run Text="{Binding SelectedCategory.Icon}" FontSize="16"/>
+                                <Run Text=" "/>
+                                <Run Text="{Binding SelectedCategory.Name}"
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource BrushTextPrimary}"
+                                     FontSize="14"/>
+                            </TextBlock>
+                            <TextBlock Text="{Binding SelectedCategory.Description}"
+                                       Foreground="{StaticResource BrushTextSecondary}"
+                                       FontSize="11"/>
+                        </StackPanel>
                     </DockPanel>
                 </Border>
 
-                <!-- Category tabs -->
-                <TabControl ItemsSource="{Binding Categories}"
-                            SelectedItem="{Binding SelectedCategory}">
-                    <TabControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:TweakCategoryViewModel}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Icon}" FontSize="13" Margin="0,0,5,0"
-                                           VerticalAlignment="Center"/>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" FontSize="12"/>
-                                    <TextBlock FontSize="10" Foreground="{StaticResource BrushTextMuted}">
-                                        <Run Text="{Binding SelectedCount}"/>
-                                        <Run Text="/"/>
-                                        <Run Text="{Binding TotalCount}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                    </TabControl.ItemTemplate>
-                    <TabControl.ContentTemplate>
-                        <DataTemplate DataType="{x:Type vm:TweakCategoryViewModel}">
-                            <DockPanel>
-                                <!-- Category header -->
-                                <Border DockPanel.Dock="Top"
-                                        Background="{StaticResource BrushBg0}"
-                                        Padding="14,8"
-                                        BorderBrush="{StaticResource BrushBg2}"
-                                        BorderThickness="0,0,0,1">
-                                    <DockPanel>
-                                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                            <Button Content="Select All"
-                                                    Command="{Binding SelectAllCommand}"
-                                                    Style="{StaticResource SmallButton}"
-                                                    Margin="0,0,8,0"/>
-                                            <Button Content="Deselect All"
-                                                    Command="{Binding DeselectAllCommand}"
-                                                    Style="{StaticResource SmallButton}"/>
-                                        </StackPanel>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock>
-                                                <Run Text="{Binding Icon}" FontSize="16"/>
-                                                <Run Text=" "/>
-                                                <Run Text="{Binding Name}"
-                                                     FontWeight="SemiBold"
-                                                     Foreground="{StaticResource BrushTextPrimary}"
-                                                     FontSize="14"/>
-                                            </TextBlock>
-                                            <TextBlock Text="{Binding Description}"
-                                                       Foreground="{StaticResource BrushTextSecondary}"
-                                                       FontSize="11"/>
-                                        </StackPanel>
-                                    </DockPanel>
-                                </Border>
-
-                                <!-- Tweak list -->
-                                <ScrollViewer DockPanel.Dock="Bottom"
-                                              VerticalScrollBarVisibility="Auto"
-                                              x:Name="TweakScroller">
-                                    <ItemsControl ItemsSource="{Binding Tweaks}"
-                                                  ItemTemplate="{StaticResource TweakRowTemplate}"
-                                                  Margin="8,4"/>
-                                </ScrollViewer>
-                            </DockPanel>
-                        </DataTemplate>
-                    </TabControl.ContentTemplate>
-                </TabControl>
+                <!-- Tweaks list -->
+                <ScrollViewer DockPanel.Dock="Bottom"
+                              VerticalScrollBarVisibility="Auto"
+                              x:Name="TweakScroller">
+                    <ItemsControl ItemsSource="{Binding FilteredTweaks}"
+                                  ItemTemplate="{StaticResource TweakRowTemplate}"
+                                  Margin="8,4"/>
+                </ScrollViewer>
             </DockPanel>
         </Grid>
 
@@ -394,6 +411,14 @@
                 BorderThickness="0,1,0,0"
                 Padding="12,0">
             <DockPanel VerticalAlignment="Center">
+                <!-- Apply button on the right -->
+                <Button DockPanel.Dock="Right"
+                        Content="▶ Apply Selected"
+                        Command="{Binding ApplySelectedCommand}"
+                        Style="{StaticResource SmallButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding CanApply}"/>
+                
                 <!-- Indeterminate progress while applying -->
                 <ProgressBar DockPanel.Dock="Right"
                              Width="120" Height="4"

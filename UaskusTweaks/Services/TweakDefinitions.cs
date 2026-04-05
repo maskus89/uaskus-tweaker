@@ -786,9 +786,9 @@ public static class TweakDefinitions
     {
         return Tweak(id, name,
             $"Removes the {name.Replace("Remove ", "")} built-in app.",
-            $"Uses Get-AppxPackage {package} | Remove-AppxPackage to remove the package for the current user.",
+            $"Uses Get-AppxPackage {package} | Remove-AppxPackage -ErrorAction SilentlyContinue to remove packages safely, skipping any that fail.",
             risk, true, false,
-            PS($"Get-AppxPackage {package} | Remove-AppxPackage"));
+            PS($"Get-AppxPackage {package} -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue"));
     }
 
     private static TweakCommand Reg(string path, string name, object value,

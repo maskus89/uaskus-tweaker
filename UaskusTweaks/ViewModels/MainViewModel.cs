@@ -35,7 +35,11 @@ public class MainViewModel : BaseViewModel
     public TweakCategoryViewModel? SelectedCategory
     {
         get => _selectedCategory;
-        set => SetProperty(ref _selectedCategory, value);
+        set
+        {
+            SetProperty(ref _selectedCategory, value);
+            OnPropertyChanged(nameof(FilteredTweaks));
+        }
     }
 
     public bool IsApplying
@@ -100,6 +104,7 @@ public class MainViewModel : BaseViewModel
     public ICommand PrivacyPresetCommand { get; }
     public ICommand MaxPerformanceCommand { get; }
     public ICommand ExtremePerformanceCommand { get; }
+    public ICommand SelectCategoryCommand { get; }
 
     public MainViewModel()
     {
@@ -138,6 +143,12 @@ public class MainViewModel : BaseViewModel
             "perf_cpu_priority", "perf_winsearch",
             "ext_hpet", "ext_dynamictick", "ext_timer_res", "ext_mmcss",
             "ext_cpu_sched"));
+
+        SelectCategoryCommand = new RelayCommand(param =>
+        {
+            if (param is TweakCategoryViewModel cat)
+                SelectedCategory = cat;
+        });
 
         // Now try to load tweaks
         try

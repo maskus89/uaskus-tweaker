@@ -35,7 +35,7 @@ jobs:
 
       - name: Package artifact as zip
         shell: pwsh
-        run: Compress-Archive -Path publish/UaskusTweaks.exe -DestinationPath publish/UaskusTweaks.zip
+        run: Compress-Archive -Path publish/* -DestinationPath publish/UaskusTweaks.zip
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -79,14 +79,18 @@ jobs:
           - No additional runtime required (self-contained executable)
 
           ### How to Use
-          1. Download **UaskusTweaks.zip** and extract **UaskusTweaks.exe**
-          2. Right-click → **Run as administrator**
+          1. Download **UaskusTweaks.exe** and run it
+          2. Click **Yes** when the admin prompt appears
           3. Select the tweaks you want to apply and click **Apply**
+
+          ### Downloads
+          - **UaskusTweaks.exe** - Quick download, no extraction needed. Just run!
+          - **UaskusTweaks.zip** - Includes all dependencies for portable use
           EOF
 
           gh release delete "$TAG" --yes 2>/dev/null || true
           git push origin ":refs/tags/$TAG" 2>/dev/null || true
-          gh release create "$TAG" publish/UaskusTweaks.zip \
+          gh release create "$TAG" publish/UaskusTweaks.exe publish/UaskusTweaks.zip \
             --title "Uaskus Tweaker $TAG - WPF Edition" \
             --notes-file release-notes.md \
             --latest
