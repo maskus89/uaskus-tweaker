@@ -35,7 +35,7 @@ jobs:
 
       - name: Package artifact as zip
         shell: pwsh
-        run: Compress-Archive -Path publish/UaskusTweaks.exe -DestinationPath publish/UaskusTweaks.zip
+        run: Compress-Archive -Path publish/* -DestinationPath publish/UaskusTweaks.zip
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
