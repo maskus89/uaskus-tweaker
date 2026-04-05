@@ -8,11 +8,11 @@ public class SystemInfoViewModel : BaseViewModel
     private readonly SystemInfoService _service = new();
     private SystemInfo _info = new();
 
-    public RelayCommand RefreshCommand { get; }
+    public AsyncRelayCommand RefreshCommand { get; }
 
     public SystemInfoViewModel()
     {
-        RefreshCommand = new RelayCommand(async () => await RefreshAsync());
+        RefreshCommand = new AsyncRelayCommand(async () => await RefreshAsync());
     }
 
     public async Task RefreshAsync()

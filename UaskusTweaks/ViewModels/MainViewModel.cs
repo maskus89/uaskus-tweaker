@@ -112,16 +112,16 @@ public class MainViewModel : BaseViewModel
         }
         SelectedCategory = Categories.FirstOrDefault();
 
-        ApplySelectedCommand = new RelayCommand(
-            async _ => await ApplyTweaksAsync(),
-            _ => CanApply);
+        ApplySelectedCommand = new AsyncRelayCommand(
+            async () => await ApplyTweaksAsync(),
+            () => CanApply);
 
         PreviewCommand = new RelayCommand(_ => ShowPreview());
 
         ExportLogCommand = new RelayCommand(_ => ExportLog());
 
-        RefreshSystemInfoCommand = new RelayCommand(
-            async _ => await SystemInfo.RefreshAsync());
+        RefreshSystemInfoCommand = new AsyncRelayCommand(
+            async () => await SystemInfo.RefreshAsync());
 
         GamingPresetCommand = new RelayCommand(_ => ApplyPreset("Gaming Preset",
             "essential_gamedvr", "game_mode", "game_dvr_bar", "game_fso",
