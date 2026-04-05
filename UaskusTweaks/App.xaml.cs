@@ -15,39 +15,40 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
             var ex = args.ExceptionObject as Exception;
-            MessageBox.Show($"Unhandled error:\n{ex?.Message}\n\n{ex?.StackTrace}",
-                "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Unhandled error:\n{ex?.Message}", "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
         };
 
         DispatcherUnhandledException += (s, args) =>
         {
-            MessageBox.Show($"UI error:\n{args.Exception.Message}\n\n{args.Exception.StackTrace}",
-                "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            args.Handled = true;
+            MessageBox.Show($"UI error:\n{args.Exception.Message}", "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            args.Handled = false;
         };
 
         if (!IsRunningAsAdmin())
         {
-            MessageBox.Show(
-                "Uaskus Tweaks needs to run as Administrator. Right-click the EXE and choose Run as administrator.",
-                "Administrator Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+            // Restart as admin
+            var exePath = Process.GetCurrentProcess().MainModule!.FileName!;
+            var psi = new ProcessStartInfo
+            {
+                FileName = exePath,
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+            try
+            {
+                Process.Start(psi);
+            }
+            catch
+            {
+                MessageBox.Show("This application requires administrator privileges.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             Shutdown();
             return;
         }
 
-        try
-        {
-            var mainWindow = new MainWindow();
-            MainWindow = mainWindow;
-            mainWindow.Show();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Failed to start the app:\n{ex.Message}\n\n{ex.StackTrace}",
-                "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            Shutdown(1);
-            return;
-        }
+        var mainWindow = new MainWindow();
+        MainWindow = mainWindow;
+        mainWindow.Show();
 
         base.OnStartup(e);
     }

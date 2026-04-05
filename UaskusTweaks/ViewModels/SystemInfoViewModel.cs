@@ -7,6 +7,24 @@ public class SystemInfoViewModel : BaseViewModel
 {
     private readonly SystemInfoService _service = new();
     private SystemInfo _info = new();
+    
+    private string _osVersion = string.Empty;
+    private string _osBuild = string.Empty;
+    private string _cpuName = string.Empty;
+    private int _cpuCores;
+    private int _cpuThreads;
+    private double _cpuSpeedGHz;
+    private double _ramTotalGB;
+    private double _ramAvailableGB;
+    private double _ramUsagePercent;
+    private string _gpuName = string.Empty;
+    private double _gpuVramGB;
+    private double _storageFreeGB;
+    private double _storageTotalGB;
+    private string _powerPlan = string.Empty;
+    private TimeSpan _uptime;
+    private string _displayResolution = string.Empty;
+    private int _refreshRateHz;
 
     public AsyncRelayCommand RefreshCommand { get; }
 
@@ -18,41 +36,57 @@ public class SystemInfoViewModel : BaseViewModel
     public async Task RefreshAsync()
     {
         _info = await _service.GetSystemInfoAsync();
-        OnPropertyChanged(string.Empty); // refresh all
+        OsVersion = _info.OsVersion;
+        OsBuild = _info.OsBuild;
+        CpuName = _info.CpuName;
+        CpuCores = _info.CpuCores;
+        CpuThreads = _info.CpuThreads;
+        CpuSpeedGHz = _info.CpuSpeedGHz;
+        RamTotalGB = _info.RamTotalGB;
+        RamAvailableGB = _info.RamAvailableGB;
+        RamUsagePercent = _info.RamUsagePercent;
+        GpuName = _info.GpuName;
+        GpuVramGB = _info.GpuVramGB;
+        StorageFreeGB = _info.StorageFreeGB;
+        StorageTotalGB = _info.StorageTotalGB;
+        PowerPlan = _info.PowerPlan;
+        Uptime = _info.Uptime;
+        DisplayResolution = _info.DisplayResolution;
+        RefreshRateHz = _info.RefreshRateHz;
     }
 
-    public string OsVersion => _info.OsVersion;
-    public string OsBuild => _info.OsBuild;
-    public string CpuName => _info.CpuName;
-    public int CpuCores => _info.CpuCores;
-    public int CpuThreads => _info.CpuThreads;
-    public double CpuSpeedGHz => _info.CpuSpeedGHz;
-    public double RamTotalGB => _info.RamTotalGB;
-    public double RamAvailableGB => _info.RamAvailableGB;
-    public double RamUsagePercent => _info.RamUsagePercent;
-    public string GpuName => _info.GpuName;
-    public double GpuVramGB => _info.GpuVramGB;
-    public double StorageFreeGB => _info.StorageFreeGB;
-    public double StorageTotalGB => _info.StorageTotalGB;
-    public string PowerPlan => _info.PowerPlan;
-    public TimeSpan Uptime => _info.Uptime;
-    public string DisplayResolution => _info.DisplayResolution;
-    public int RefreshRateHz => _info.RefreshRateHz;
+    public string OsVersion { get => _osVersion; set => SetProperty(ref _osVersion, value); }
+    public string OsBuild { get => _osBuild; set => SetProperty(ref _osBuild, value); }
+    public string CpuName { get => _cpuName; set => SetProperty(ref _cpuName, value); }
+    public int CpuCores { get => _cpuCores; set => SetProperty(ref _cpuCores, value); }
+    public int CpuThreads { get => _cpuThreads; set => SetProperty(ref _cpuThreads, value); }
+    public double CpuSpeedGHz { get => _cpuSpeedGHz; set => SetProperty(ref _cpuSpeedGHz, value); }
+    public double RamTotalGB { get => _ramTotalGB; set => SetProperty(ref _ramTotalGB, value); }
+    public double RamAvailableGB { get => _ramAvailableGB; set => SetProperty(ref _ramAvailableGB, value); }
+    public double RamUsagePercent { get => _ramUsagePercent; set => SetProperty(ref _ramUsagePercent, value); }
+    public string GpuName { get => _gpuName; set => SetProperty(ref _gpuName, value); }
+    public double GpuVramGB { get => _gpuVramGB; set => SetProperty(ref _gpuVramGB, value); }
+    public double StorageFreeGB { get => _storageFreeGB; set => SetProperty(ref _storageFreeGB, value); }
+    public double StorageTotalGB { get => _storageTotalGB; set => SetProperty(ref _storageTotalGB, value); }
+    public string PowerPlan { get => _powerPlan; set => SetProperty(ref _powerPlan, value); }
+    public TimeSpan Uptime { get => _uptime; set => SetProperty(ref _uptime, value); }
+    public string DisplayResolution { get => _displayResolution; set => SetProperty(ref _displayResolution, value); }
+    public int RefreshRateHz { get => _refreshRateHz; set => SetProperty(ref _refreshRateHz, value); }
 
     public string RamDisplay =>
-        $"{_info.RamAvailableGB:F1} GB / {_info.RamTotalGB:F1} GB ({_info.RamUsagePercent:F0}% used)";
+        $"{_ramAvailableGB:F1} GB / {_ramTotalGB:F1} GB ({_ramUsagePercent:F0}% used)";
 
     public string CpuDisplay =>
-        $"{_info.CpuCores}C / {_info.CpuThreads}T  {_info.CpuSpeedGHz:F2} GHz";
+        $"{_cpuCores}C / {_cpuThreads}T  {_cpuSpeedGHz:F2} GHz";
 
     public string StorageDisplay =>
-        $"{_info.StorageFreeGB:F1} GB free / {_info.StorageTotalGB:F1} GB";
+        $"{_storageFreeGB:F1} GB free / {_storageTotalGB:F1} GB";
 
     public string UptimeDisplay
     {
         get
         {
-            var u = _info.Uptime;
+            var u = _uptime;
             return $"{(int)u.TotalHours}h {u.Minutes}m {u.Seconds}s";
         }
     }

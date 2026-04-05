@@ -103,23 +103,13 @@ public class MainViewModel : BaseViewModel
 
     public MainViewModel()
     {
-        var categories = TweakDefinitions.GetAllCategories();
-        foreach (var cat in categories)
-        {
-            foreach (var tweak in cat.Tweaks)
-                tweak.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SelectedTweakCount));
-            Categories.Add(cat);
-        }
-        SelectedCategory = Categories.FirstOrDefault();
-
+        // Initialize commands first (ALWAYS, even if tweaks fail to load)
         ApplySelectedCommand = new AsyncRelayCommand(
             async () => await ApplyTweaksAsync(),
             () => CanApply);
 
         PreviewCommand = new RelayCommand(_ => ShowPreview());
-
         ExportLogCommand = new RelayCommand(_ => ExportLog());
-
         RefreshSystemInfoCommand = new AsyncRelayCommand(
             async () => await SystemInfo.RefreshAsync());
 
@@ -149,7 +139,33 @@ public class MainViewModel : BaseViewModel
             "ext_hpet", "ext_dynamictick", "ext_timer_res", "ext_mmcss",
             "ext_cpu_sched"));
 
-        _ = SystemInfo.RefreshAsync();
+        // Now try to load tweaks
+        try
+        {
+            var categories = TweakDefinitions.GetAllCategories();
+            foreach (var cat in categories)
+            {
+                foreach (var tweak in cat.Tweaks)
+                    tweak.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SelectedTweakCount));
+                Categories.Add(cat);
+            }
+            SelectedCategory = Categories.FirstOrDefault();
+            AddLog("Tweaks loaded successfully.", LogLevel.Success);
+        }
+        catch (Exception ex)
+        {
+            AddLog($"Error loading tweaks: {ex.Message}", LogLevel.Error);
+        }
+
+        try
+        {
+            _ = SystemInfo.RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            AddLog($"Warning: Could not load system info: {ex.Message}", LogLevel.Warning);
+        }
+
         AddLog("Uaskus Tweaks started. Running as " + (IsAdmin ? "Administrator." : "Standard User."),
             IsAdmin ? LogLevel.Success : LogLevel.Warning);
     }
