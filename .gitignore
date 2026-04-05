@@ -1,1 +1,15 @@
+## Build artifacts
 obj/
+bin/
+*.user
+*.suo
+.vs/
+**/Debug/
+**/Release/
+*.exe
+*.dll
+*.pdb
+
+## IDE files
+.idea/
+*.DS_Store
