@@ -12,26 +12,6 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
-        if (!IsRunningAsAdmin())
-        {
-            try
-            {
-                var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? Environment.ProcessPath ?? string.Empty;
-                var psi = new ProcessStartInfo(exePath)
-                {
-                    UseShellExecute = true,
-                    Verb = "runas"
-                };
-                Process.Start(psi);
-            }
-            catch
-            {
-                // User cancelled UAC or elevation failed; continue without admin
-            }
-            Shutdown();
-            return;
-        }
-
         AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
             var ex = args.ExceptionObject as Exception;
@@ -45,6 +25,29 @@ public partial class App : Application
                 "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;
         };
+
+        if (!IsRunningAsAdmin())
+        {
+            MessageBox.Show(
+                "Uaskus Tweaks needs to run as Administrator. Right-click the EXE and choose Run as administrator.",
+                "Administrator Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Shutdown();
+            return;
+        }
+
+        try
+        {
+            var mainWindow = new MainWindow();
+            MainWindow = mainWindow;
+            mainWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to start the app:\n{ex.Message}\n\n{ex.StackTrace}",
+                "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
+            return;
+        }
 
         base.OnStartup(e);
     }
