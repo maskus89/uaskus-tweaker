@@ -1,0 +1,102 @@
+# Uaskus Tweaker
+
+A modern WPF GUI application for Windows 10/11 optimization — a professional replacement for the original `uaskustweaker.bat` script.
+
+![Build and Release](https://github.com/maskus89/uaskus-tweaker/workflows/Build%20and%20Release/badge.svg)
+
+## Features
+
+- Dark-themed graphical interface
+- 100+ Windows tweaks organized by category (Performance, Privacy, Gaming, and more)
+- Risk indicators so you know which tweaks are safe vs. advanced
+- One-click presets: Gaming, Privacy, Max Performance, Extreme Performance
+- Automatic system restore point before applying any changes
+- Built-in log viewer and log export
+- No installation required — single self-contained `.exe`
+
+## Download
+
+### Latest Release (Recommended)
+
+Go to the [**Releases page**](https://github.com/maskus89/uaskus-tweaker/releases/latest) and download `UaskusTweaks.zip`.
+
+Extract the zip and run `UaskusTweaks.exe` as **Administrator**.
+
+### CI Build Artifact
+
+Every push to `main` also produces a build artifact:
+
+1. Go to [**Actions**](https://github.com/maskus89/uaskus-tweaker/actions)
+2. Click the latest **Build and Release** run
+3. Scroll to **Artifacts** and download `UaskusTweaks-exe`
+
+> CI artifacts expire after 90 days. Use the Releases page for permanent downloads.
+
+## Requirements
+
+- Windows 10 or Windows 11 (64-bit)
+- Administrator privileges (required to apply system tweaks)
+- No .NET runtime needed — the `.exe` is fully self-contained
+
+## How to Use
+
+1. Download `UaskusTweaks.zip` from the [Releases page](https://github.com/maskus89/uaskus-tweaker/releases/latest)
+2. Extract `UaskusTweaks.exe`
+3. Right-click → **Run as administrator**
+4. Browse categories on the left or use a preset button
+5. Check the tweaks you want to apply
+6. Click **Apply Selected** (a restore point is created automatically)
+
+## Build Locally
+
+### Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8)
+- Windows (required — this is a WPF/Windows-only application)
+
+### Steps
+
+```bash
+# Clone the repo
+git clone https://github.com/maskus89/uaskus-tweaker.git
+cd uaskus-tweaker
+
+# Restore packages
+dotnet restore UaskusTweaks/UaskusTweaks.csproj
+
+# Build (debug)
+dotnet build UaskusTweaks/UaskusTweaks.csproj
+
+# Publish a self-contained single-file executable
+dotnet publish UaskusTweaks/UaskusTweaks.csproj `
+  -c Release `
+  -r win-x64 `
+  --self-contained true `
+  -p:PublishSingleFile=true `
+  -o publish
+```
+
+The finished executable will be at `publish\UaskusTweaks.exe`.
+
+## Publishing a New Release
+
+Push a version tag to trigger the release workflow automatically:
+
+```bash
+git tag v2.1.0
+git push origin v2.1.0
+```
+
+The workflow will build the executable, package it as `UaskusTweaks.zip`, and create a GitHub Release with the zip attached.
+
+## Project Structure
+
+```
+UaskusTweaks/
+├── Models/          # Data models (Tweak, TweakCommand, RiskLevel, …)
+├── ViewModels/      # MVVM view models
+├── Services/        # Business logic (PowerShell, Registry, RestorePoint, …)
+├── Resources/       # WPF resource dictionaries (colors, styles)
+├── MainWindow.xaml  # Main application window
+└── App.xaml         # Application entry point
+```

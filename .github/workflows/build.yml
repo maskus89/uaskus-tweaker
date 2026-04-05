@@ -3,6 +3,7 @@ name: Build and Release
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
 
 permissions:
   contents: write
@@ -32,23 +33,40 @@ jobs:
           -p:PublishSingleFile=true
           -o publish
 
+      - name: Package artifact as zip
+        shell: pwsh
+        run: Compress-Archive -Path publish/UaskusTweaks.exe -DestinationPath publish/UaskusTweaks.zip
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: UaskusTweaks-exe
-          path: publish/UaskusTweaks.exe
+          path: publish/UaskusTweaks.zip
+
+      - name: Determine release version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+            echo "is_tag=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v2.0.0" >> "$GITHUB_OUTPUT"
+            echo "is_tag=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
         shell: bash
         run: |
           cat > release-notes.md <<'EOF'
-          ## Uaskus Tweaker v2.0.0 - WPF Edition
+          ## Uaskus Tweaker - WPF Edition
 
           Modern WPF GUI application replacing the original batch-file tool.
 
-          ### What's New
+          ### Features
           - Professional dark-themed graphical interface
           - One-click performance, privacy, and gaming optimizations
           - 100+ Windows tweaks with descriptions and risk indicators
@@ -61,14 +79,14 @@ jobs:
           - No additional runtime required (self-contained executable)
 
           ### How to Use
-          1. Download **UaskusTweaks.exe**
+          1. Download **UaskusTweaks.zip** and extract **UaskusTweaks.exe**
           2. Right-click → **Run as administrator**
           3. Select the tweaks you want to apply and click **Apply**
           EOF
 
-          gh release delete v2.0.0 --yes 2>/dev/null || true
-          git push origin :refs/tags/v2.0.0 2>/dev/null || true
-          gh release create v2.0.0 publish/UaskusTweaks.exe \
-            --title "Uaskus Tweaker v2.0.0 - WPF Edition" \
+          gh release delete "$TAG" --yes 2>/dev/null || true
+          git push origin ":refs/tags/$TAG" 2>/dev/null || true
+          gh release create "$TAG" publish/UaskusTweaks.zip \
+            --title "Uaskus Tweaker $TAG - WPF Edition" \
             --notes-file release-notes.md \
             --latest
