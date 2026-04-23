@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaDiscord, FaGithub, FaTiktok } from "react-icons/fa6";
+import InteractiveDotGrid from "./InteractiveDotGrid";
 import { externalLinks } from "../content";
 
 type SiteLayoutProps = {
@@ -47,7 +48,7 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
 
   return (
     <div className="site-shell">
-      <div className="site-grid site-grid--primary" />
+      <InteractiveDotGrid />
 
       <header className="site-header">
         <div className="site-header__inner">
