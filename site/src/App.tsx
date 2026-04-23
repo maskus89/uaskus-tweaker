@@ -9,8 +9,24 @@ function ScrollToTop() {
   const location = useLocation();
 
   useLayoutEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [location.pathname]);
+    const scrollRoot = document.scrollingElement ?? document.documentElement;
+
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      scrollRoot.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+
+    const frameId = window.requestAnimationFrame(resetScroll);
+    const timeoutId = window.setTimeout(resetScroll, 0);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [location.key]);
 
   return null;
 }
