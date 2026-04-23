@@ -22,11 +22,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore UaskusTweaks/UaskusTweaks.csproj
+        run: dotnet restore src/UaskusTweaks.csproj
 
       - name: Publish single-file executable
         run: >
-          dotnet publish UaskusTweaks/UaskusTweaks.csproj
+          dotnet publish src/UaskusTweaks.csproj
           -c Release
           -r win-x64
           --self-contained true
