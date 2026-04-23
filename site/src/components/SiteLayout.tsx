@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaDiscord, FaGithub, FaTiktok } from "react-icons/fa6";
 import InteractiveDotGrid from "./InteractiveDotGrid";
 import { externalLinks } from "../content";
@@ -8,14 +8,51 @@ type SiteLayoutProps = {
   children: ReactNode;
 };
 
-function SectionLink({
-  label,
-  section
+type RouteButtonProps = {
+  to: string;
+  className?: string;
+  active?: boolean;
+  children: ReactNode;
+};
+
+function RouteButton({
+  to,
+  className,
+  active = false,
+  children
+}: RouteButtonProps) {
+  const navigate = useNavigate();
+
+  return (
+    <button
+      aria-current={active ? "page" : undefined}
+      className={className}
+      onClick={() => navigate(to)}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
+
+function ExternalButton({
+  href,
+  className,
+  children
 }: {
-  label: string;
-  section: "features" | "download";
+  href: string;
+  className?: string;
+  children: ReactNode;
 }) {
-  return <Link to={`/?section=${section}`}>{label}</Link>;
+  return (
+    <button
+      className={className}
+      onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
+      type="button"
+    >
+      {children}
+    </button>
+  );
 }
 
 function SocialLink({ href, label }: { href: string; label: string }) {
@@ -43,6 +80,7 @@ function SocialLink({ href, label }: { href: string; label: string }) {
 
 export default function SiteLayout({ children }: SiteLayoutProps) {
   const location = useLocation();
+  const isDownload = location.pathname === "/download";
   const isGuide = location.pathname === "/guide";
   const isAbout = location.pathname === "/about";
 
@@ -52,19 +90,20 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
 
       <header className="site-header">
         <div className="site-header__inner">
-          <Link className="site-brand" to="/">
+          <RouteButton className="site-brand" to="/">
             Uaskus Tweaker
-          </Link>
+          </RouteButton>
 
           <nav className="site-nav" aria-label="Primary">
-            <SectionLink label="Features" section="features" />
-            <SectionLink label="Download" section="download" />
-            <Link className={isGuide ? "is-active" : undefined} to="/guide">
+            <RouteButton active={isDownload} className={isDownload ? "is-active" : undefined} to="/download">
+              Download
+            </RouteButton>
+            <RouteButton active={isGuide} className={isGuide ? "is-active" : undefined} to="/guide">
               Guide
-            </Link>
-            <Link className={isAbout ? "is-active" : undefined} to="/about">
+            </RouteButton>
+            <RouteButton active={isAbout} className={isAbout ? "is-active" : undefined} to="/about">
               About Me
-            </Link>
+            </RouteButton>
             <div className="site-nav__socials" aria-label="Social links">
               {externalLinks.map((link) => (
                 <SocialLink key={link.label} href={link.href} label={link.label} />
@@ -74,20 +113,23 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
         </div>
       </header>
 
-      <main>{children}</main>
+      <main>
+        <div className="page-transition" key={location.pathname}>
+          {children}
+        </div>
+      </main>
 
       <footer className="site-footer">
         <div className="site-footer__links">
-          <Link to="/">Home</Link>
-          <Link to="/guide">Guide</Link>
-          <Link to="/about">About Me</Link>
-          <a
+          <RouteButton to="/">Home</RouteButton>
+          <RouteButton to="/download">Download</RouteButton>
+          <RouteButton to="/guide">Guide</RouteButton>
+          <RouteButton to="/about">About Me</RouteButton>
+          <ExternalButton
             href="https://github.com/maskus89/uaskus-tweaker"
-            target="_blank"
-            rel="noreferrer"
           >
             GitHub
-          </a>
+          </ExternalButton>
         </div>
         <p>&copy; 2026 Uaskus Tweaker. All rights reserved.</p>
       </footer>
