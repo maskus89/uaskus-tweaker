@@ -1,74 +1,73 @@
 # Uaskus Tweaker
 
-A modern WPF GUI application for Windows 10/11 optimization — a professional replacement for the original `uaskustweaker.bat` script.
+Windows 10/11 optimization utility with a modern WPF interface for debloating, privacy hardening, and performance tuning.
 
 ![Build and Release](https://github.com/maskus89/uaskus-tweaker/workflows/Build%20and%20Release/badge.svg)
 
-## Features
+Uaskus Tweaker packages common Windows tweaks behind a single GUI, with risk labels, preset bundles, logging, and automatic restore point creation before changes are applied.
 
-- Dark-themed graphical interface
-- 100+ Windows tweaks organized by category (Performance, Privacy, Gaming, and more)
-- Risk indicators so you know which tweaks are safe vs. advanced
-- One-click presets: Gaming, Privacy, Max Performance, Extreme Performance
-- Automatic system restore point before applying any changes
-- Built-in log viewer and log export
-- No installation required — single self-contained `.exe`
+## Highlights
 
-## Download
+- 100+ Windows tweaks grouped by category
+- One-click presets for gaming, privacy, and performance
+- Clear risk indicators for safer review before applying changes
+- Built-in log output and log export
+- Self-contained Windows executable for end users
 
-### Latest Release (Recommended)
+## Quick Start
 
-Go to the [**Releases page**](https://github.com/maskus89/uaskus-tweaker/releases/latest) and download `UaskusTweaks.zip`.
+1. Download the latest `UaskusTweaks.zip` from [GitHub Releases](https://github.com/maskus89/uaskus-tweaker/releases/latest).
+2. Extract the archive.
+3. Run `UaskusTweaks.exe` as **Administrator**.
+4. Review the selected tweaks and their risk level.
+5. Apply changes and restart Windows if prompted.
 
-Extract the zip and run `UaskusTweaks.exe` as **Administrator**.
+## Safety Notes
 
-### CI Build Artifact
-
-Every push to `main` also produces a build artifact:
-
-1. Go to [**Actions**](https://github.com/maskus89/uaskus-tweaker/actions)
-2. Click the latest **Build and Release** run
-3. Scroll to **Artifacts** and download `UaskusTweaks-exe`
-
-> CI artifacts expire after 90 days. Use the Releases page for permanent downloads.
+- This application changes Windows system settings, services, boot configuration, and registry values.
+- Some tweaks require a restart before they take effect.
+- A system restore point is created before applying changes.
+- Review high-risk and extreme tweaks carefully before using them on production or shared machines.
 
 ## Requirements
 
-- Windows 10 or Windows 11 (64-bit)
-- Administrator privileges (required to apply system tweaks)
-- No .NET runtime needed — the `.exe` is fully self-contained
+- Windows 10 or Windows 11, 64-bit
+- Administrator privileges
+- No separate .NET runtime for the published executable
 
-## How to Use
+## Distribution
 
-1. Download `UaskusTweaks.zip` from the [Releases page](https://github.com/maskus89/uaskus-tweaker/releases/latest)
-2. Extract `UaskusTweaks.exe`
-3. Right-click → **Run as administrator**
-4. Browse categories on the left or use a preset button
-5. Check the tweaks you want to apply
-6. Click **Apply Selected** (a restore point is created automatically)
+### Stable Release
 
-## Build Locally
+Use the latest release artifact from [GitHub Releases](https://github.com/maskus89/uaskus-tweaker/releases/latest).
+
+### CI Artifact
+
+Every push to `main` also produces a portable build artifact:
+
+1. Open [GitHub Actions](https://github.com/maskus89/uaskus-tweaker/actions)
+2. Select the latest `Build and Release` run
+3. Download the `UaskusTweaks-exe` artifact
+
+## Development
 
 ### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8)
-- Windows (required — this is a WPF/Windows-only application)
+- Windows, because the project targets WPF
+- [Node.js](https://nodejs.org/) for the Vite-powered documentation site
 
-### Steps
+### Build
 
-```bash
-# Clone the repo
-git clone https://github.com/maskus89/uaskus-tweaker.git
-cd uaskus-tweaker
+```powershell
+dotnet restore src/UaskusTweaks.csproj
+dotnet build src/UaskusTweaks.csproj
+```
 
-# Restore packages
-dotnet restore UaskusTweaks/UaskusTweaks.csproj
+### Publish
 
-# Build (debug)
-dotnet build UaskusTweaks/UaskusTweaks.csproj
-
-# Publish a self-contained single-file executable
-dotnet publish UaskusTweaks/UaskusTweaks.csproj `
+```powershell
+dotnet publish src/UaskusTweaks.csproj `
   -c Release `
   -r win-x64 `
   --self-contained true `
@@ -76,27 +75,48 @@ dotnet publish UaskusTweaks/UaskusTweaks.csproj `
   -o publish
 ```
 
-The finished executable will be at `publish\UaskusTweaks.exe`.
+Published output:
 
-## Publishing a New Release
-
-Push a version tag to trigger the release workflow automatically:
-
-```bash
-git tag v2.1.0
-git push origin v2.1.0
+```text
+publish\UaskusTweaks.exe
 ```
 
-The workflow will build the executable, package it as `UaskusTweaks.zip`, and create a GitHub Release with the zip attached.
+### Site
 
-## Project Structure
+The repository also includes a Vite + React + TypeScript site:
 
+```powershell
+npm install
+npm run site:dev
+npm run site:typecheck
+npm run site:build
 ```
-UaskusTweaks/
-├── Models/          # Data models (Tweak, TweakCommand, RiskLevel, …)
-├── ViewModels/      # MVVM view models
-├── Services/        # Business logic (PowerShell, Registry, RestorePoint, …)
-├── Resources/       # WPF resource dictionaries (colors, styles)
-├── MainWindow.xaml  # Main application window
-└── App.xaml         # Application entry point
+
+Site source lives in `site/` and the production build is emitted to `site/dist/`.
+
+## Repository Layout
+
+```text
+.github/             CI/CD workflows
+site/                Vite + React + TypeScript site source
+src/                 WPF application source code
+README.md
+RELEASES.md
+uaskus-tweaker.sln
 ```
+
+```text
+src/
+|- Models/           Domain models
+|- Resources/        WPF resource dictionaries
+|- Services/         Windows integration and tweak execution logic
+|- ViewModels/       MVVM view models and commands
+|- App.xaml
+|- MainWindow.xaml
+|- UaskusTweaks.csproj
+```
+
+## Documentation
+
+- Site source entrypoint: [site/index.html](site/index.html)
+- Release notes: [RELEASES.md](RELEASES.md)
