@@ -6,8 +6,8 @@ const MAX_OFFSET = 14;
 const ACTIVE_EASE = 0.16;
 const RETURN_EASE = 0.12;
 const SETTLE_EPSILON = 0.02;
-const BASE_SIZE = 1.4;
-const BOOST_SIZE = 0.8;
+const BASE_SIZE = 1.85;
+const BOOST_SIZE = 1.05;
 const MAX_DEVICE_PIXEL_RATIO = 1.5;
 const IDLE_AMPLITUDE_MIN = 0.18;
 const IDLE_AMPLITUDE_MAX = 1.05;
@@ -116,7 +116,7 @@ export default function InteractiveDotGrid() {
       frameId = 0;
 
       context.clearRect(0, 0, grid.width, grid.height);
-      context.fillStyle = "#96b8ff";
+      context.fillStyle = "#b8d2ff";
 
       const radiusSquared = REPEL_RADIUS * REPEL_RADIUS;
       const time = timestamp * 0.001;
@@ -175,7 +175,7 @@ export default function InteractiveDotGrid() {
         const y = grid.baseY[index] + idleY + grid.offsetY[index];
         const size = BASE_SIZE + influence * BOOST_SIZE;
 
-        context.globalAlpha = 0.16 + influence * 0.38;
+        context.globalAlpha = 0.24 + influence * 0.42;
         context.fillRect(x - size / 2, y - size / 2, size, size);
       }
 
