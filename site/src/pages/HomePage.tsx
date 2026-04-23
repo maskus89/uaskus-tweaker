@@ -1,21 +1,17 @@
 import { useEffect, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { featureCards, previewItems, requirements } from "../content";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { featureCards, previewItems } from "../content";
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const featuresRef = useRef<HTMLElement | null>(null);
-  const downloadRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const section = searchParams.get("section");
-    const targets = {
-      features: featuresRef.current,
-      download: downloadRef.current
-    };
 
-    if (section === "features" || section === "download") {
-      targets[section]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (section === "features") {
+      featuresRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [searchParams]);
 
@@ -42,15 +38,20 @@ export default function HomePage() {
             </div>
 
             <div className="hero__actions">
-              <a
+              <button
                 className="button button--primary"
-                href="https://github.com/maskus89/uaskus-tweaker/releases/latest/download/UaskusTweaks.zip"
+                onClick={() => navigate("/download")}
+                type="button"
               >
                 Download Now
-              </a>
-              <Link className="button button--secondary" to="/?section=features">
+              </button>
+              <button
+                className="button button--secondary"
+                onClick={() => navigate("/guide")}
+                type="button"
+              >
                 Learn More
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -93,34 +94,6 @@ export default function HomePage() {
               <strong>Chris Titus</strong>
               <span>Tech YouTuber & Linux Advocate</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section section--download" id="download" ref={downloadRef}>
-        <div className="download-grid">
-          <div className="download-card">
-            <p className="eyebrow">v2.0.0 - WPF Edition</p>
-            <h2>Download Uaskus Tweaker</h2>
-            <p>
-              Free, open source Windows optimizer with a modern GUI. No
-              installation required, just extract and run.
-            </p>
-            <a
-              className="button button--primary"
-              href="https://github.com/maskus89/uaskus-tweaker/releases/latest/download/UaskusTweaks.zip"
-            >
-              Download for Windows
-            </a>
-          </div>
-
-          <div className="requirements-card">
-            <h3>System Requirements</h3>
-            <ul>
-              {requirements.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
           </div>
         </div>
       </section>

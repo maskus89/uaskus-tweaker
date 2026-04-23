@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import SiteLayout from "./components/SiteLayout";
 import AboutPage from "./pages/AboutPage";
+import DownloadPage from "./pages/DownloadPage";
 import GuidePage from "./pages/GuidePage";
 import HomePage from "./pages/HomePage";
 
@@ -37,6 +38,7 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/download" element={<DownloadPage />} />
         <Route path="/guide" element={<GuidePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<Navigate replace to="/" />} />
