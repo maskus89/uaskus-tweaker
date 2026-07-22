@@ -181,11 +181,6 @@ public static class TweakDefinitions
                 RiskLevel.Low, false, false,
                 Reg("HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32", "", "", RegistryValueKind.String)),
 
-            Tweak("adv_adobe_hosts", "Block Adobe Activation Servers",
-                "Adds Adobe license server domains to the hosts file to block them.",
-                "Blocks lmlicenses.wip4.adobe.com and lm.licenses.adobe.com via the hosts file.",
-                RiskLevel.Medium, true, false,
-                PS("Add-Content -Path $env:SystemRoot\\System32\\drivers\\etc\\hosts -Value \"`n127.0.0.1 lmlicenses.wip4.adobe.com`n127.0.0.1 lm.licenses.adobe.com\" -Force"))
         });
 
     // ─── ULTIMATE PERFORMANCE ─────────────────────────────────────────────────
@@ -365,7 +360,7 @@ public static class TweakDefinitions
                 "Prevents crash dumps from being sent to Microsoft.",
                 "Disables Windows Error Reporting service and sets the Disabled policy key.",
                 RiskLevel.Low, true, false,
-                Svc("WerSvc", "demand"),
+                Svc("WerSvc", "disabled"),
                 Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting", "Disabled", 1))
         });
 
@@ -408,13 +403,6 @@ public static class TweakDefinitions
                 RiskLevel.Low, true, false,
                 Reg("HKLM\\SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings", "ActiveHoursStart", 8),
                 Reg("HKLM\\SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings", "ActiveHoursEnd", 23)),
-
-            Tweak("game_nagle", "Disable Nagle's Algorithm",
-                "Reduces network latency by disabling packet coalescing.",
-                "TcpAckFrequency=1 and TCPNoDelay=1 ensure packets are sent immediately without buffering, reducing ping.",
-                RiskLevel.Medium, true, false,
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters", "TcpAckFrequency", 1),
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters", "TCPNoDelay", 1)),
 
             Tweak("game_gpu_sched", "Enable Hardware GPU Scheduling",
                 "Enables WDDM 2.7 hardware-accelerated GPU scheduling.",
@@ -681,9 +669,9 @@ public static class TweakDefinitions
         "⚠ Advanced low-level tweaks. High risk. For enthusiasts only.", "💀",
         new[]
         {
-            Tweak("ext_hpet", "Disable HPET",
-                "Removes the High Precision Event Timer from the boot config.",
-                "Disabling HPET can reduce timer overhead on some systems. Requires restart. May cause instability.",
+            Tweak("ext_hpet", "Reset HPET Boot Override",
+                "Returns the platform-clock setting to the Windows default.",
+                "Deletes only the useplatformclock boot override. Windows will choose the appropriate timer; this is not a universal performance tweak.",
                 RiskLevel.Medium, true, true,
                 Bcd("/deletevalue useplatformclock")),
 
@@ -692,13 +680,6 @@ public static class TweakDefinitions
                 "disabledynamictick=yes forces a constant timer interrupt, which can reduce latency on some CPUs.",
                 RiskLevel.Medium, true, true,
                 Bcd("/set disabledynamictick yes")),
-
-            Tweak("ext_timer_res", "Set Timer Resolution to 0.5ms",
-                "Forces the system timer to the highest resolution.",
-                "useplatformtick=yes and GlobalTimerResolutionRequests=1 request 0.5ms timer resolution for lower input latency.",
-                RiskLevel.Low, true, false,
-                Bcd("/set useplatformtick yes"),
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel", "GlobalTimerResolutionRequests", 1)),
 
             Tweak("ext_memcompression", "Disable Memory Compression",
                 "Stops Windows from compressing memory pages. Recommended for 16GB+ RAM.",
@@ -726,14 +707,6 @@ public static class TweakDefinitions
                 "Win32PrioritySeparation=38 is the same as perf_cpu_priority but placed here for extreme tuning bundles.",
                 RiskLevel.Low, true, false,
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl", "Win32PrioritySeparation", 38)),
-
-            Tweak("ext_spectre", "Disable Spectre/Meltdown Mitigations",
-                "⚠ CRITICAL: Removes CPU vulnerability mitigations for performance.",
-                "Disabling Spectre/Meltdown protections improves performance but exposes the CPU to side-channel attacks. DO NOT USE on shared or internet-facing systems.",
-                RiskLevel.Critical, true, true,
-                Bcd("/set {current} kva shadowintegrity disabled"),
-                Bcd("/set {current} nx optout"),
-                Bcd("/set {current} kva shadows no")),
 
             Tweak("ext_pagefile", "Optimize Page File",
                 "Sets a fixed-size page file for predictable performance.",

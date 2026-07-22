@@ -63,12 +63,12 @@
 
         <!-- Tweak row template -->
         <DataTemplate x:Key="TweakRowTemplate" DataType="{x:Type vm:TweakViewModel}">
-            <Border Margin="0,1"
-                    Padding="10,7"
+            <Border Margin="2,3"
+                    Padding="12,9"
                     Background="{StaticResource BrushBg1}"
-                    BorderThickness="0,0,0,1"
+                    BorderThickness="1"
                     BorderBrush="{StaticResource BrushBg2}"
-                    CornerRadius="4">
+                    CornerRadius="7">
                 <Border.ToolTip>
                     <ToolTip Content="{Binding Tooltip}"/>
                 </Border.ToolTip>
@@ -76,6 +76,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="50"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="68"/>
                         <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="40"/>
                     </Grid.ColumnDefinitions>
@@ -91,7 +92,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding Name}"
                                        Foreground="{StaticResource BrushTextPrimary}"
-                                       FontWeight="SemiBold" FontSize="13"/>
+                                       FontWeight="SemiBold" FontSize="13.5"/>
                             <TextBlock Text=" 🔒"
                                        Foreground="{StaticResource BrushWarning}"
                                        FontSize="11" VerticalAlignment="Center"
@@ -103,13 +104,26 @@
                         </StackPanel>
                         <TextBlock Text="{Binding Description}"
                                    Foreground="{StaticResource BrushTextSecondary}"
-                                   FontSize="11"
+                                   FontSize="11.5"
                                    TextWrapping="NoWrap"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
 
-                    <!-- Risk badge -->
+                    <!-- Current-state badge -->
                     <Border Grid.Column="2"
+                            Background="{Binding StateColor}"
+                            CornerRadius="3"
+                            Padding="4,2"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding StateText}"
+                                   Foreground="White"
+                                   FontSize="9"
+                                   FontWeight="Bold"/>
+                    </Border>
+
+                    <!-- Risk badge -->
+                    <Border Grid.Column="3"
                             Background="{Binding RiskColor}"
                             CornerRadius="3"
                             Padding="4,2"
@@ -122,7 +136,7 @@
                     </Border>
 
                     <!-- Restart icon -->
-                    <TextBlock Grid.Column="3"
+                    <TextBlock Grid.Column="4"
                                Text="↺"
                                Foreground="{StaticResource BrushWarning}"
                                FontSize="14"
@@ -204,6 +218,7 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Border>
+
                 </StackPanel>
 
                 <!-- Window buttons -->
@@ -274,6 +289,27 @@
                         </Grid>
                     </Border>
 
+                    <!-- Quick presets -->
+                    <Border DockPanel.Dock="Top"
+                            Margin="10,8,10,6"
+                            Padding="9"
+                            Background="{StaticResource BrushBg0}"
+                            BorderBrush="{StaticResource BrushBg2}"
+                            BorderThickness="1"
+                            CornerRadius="7">
+                        <StackPanel>
+                            <TextBlock Text="QUICK START"
+                                       Foreground="{StaticResource BrushTextMuted}"
+                                       FontSize="9" FontWeight="Bold" Margin="1,0,0,6"/>
+                            <UniformGrid Columns="2">
+                                <Button Content="Gaming" Command="{Binding GamingPresetCommand}" Style="{StaticResource SmallButton}" Margin="0,0,4,4"/>
+                                <Button Content="Privacy" Command="{Binding PrivacyPresetCommand}" Style="{StaticResource SmallButton}" Margin="0,0,0,4"/>
+                                <Button Content="Performance" Command="{Binding MaxPerformanceCommand}" Style="{StaticResource SmallButton}" Margin="0,0,4,0"/>
+                                <Button Content="Extreme" Command="{Binding ExtremePerformanceCommand}" Style="{StaticResource SmallButton}"/>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- Category buttons list -->
                     <ScrollViewer DockPanel.Dock="Bottom"
                                   VerticalScrollBarVisibility="Auto"
@@ -324,6 +360,11 @@
                         BorderThickness="0,0,0,1">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="↻ Check state"
+                                    Command="{Binding RefreshTweakStatesCommand}"
+                                    Style="{StaticResource SmallButton}"
+                                    Margin="0,0,8,0"
+                                    ToolTip="Checks registry and service settings without changing anything"/>
                             <Button Content="👁 Preview"
                                     Command="{Binding PreviewCommand}"
                                     Style="{StaticResource SmallButton}"
@@ -352,6 +393,9 @@
                             <TextBlock Text="{Binding SelectedCategory.Description}"
                                        Foreground="{StaticResource BrushTextSecondary}"
                                        FontSize="11"/>
+                            <TextBlock Text="Blue OFF means the setting does not match. Green ACTIVE means every setting was verified."
+                                       Foreground="{StaticResource BrushTextMuted}"
+                                       FontSize="10" Margin="0,2,0,0"/>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -415,7 +459,7 @@
                 <Button DockPanel.Dock="Right"
                         Content="▶ Apply Selected"
                         Command="{Binding ApplySelectedCommand}"
-                        Style="{StaticResource SmallButton}"
+                        Style="{StaticResource AccentButton}"
                         Margin="0,0,12,0"
                         IsEnabled="{Binding CanApply}"/>
                 

@@ -17,11 +17,12 @@ public class MainViewModel : BaseViewModel
 {
     private readonly TweakExecutorService _executor = new();
     private readonly RestorePointService _restorePoint = new();
-    private readonly BackupService _backup = new();
+    private readonly TweakStateDetector _stateDetector = new();
 
     private TweakCategoryViewModel? _selectedCategory;
     private bool _isApplying;
     private bool _createRestorePoint = true;
+    private bool _isCheckingStates;
     private string _searchText = string.Empty;
     private string _statusText = "Ready";
 
@@ -53,6 +54,12 @@ public class MainViewModel : BaseViewModel
     }
 
     public bool CanApply => !_isApplying;
+
+    public bool IsCheckingStates
+    {
+        get => _isCheckingStates;
+        private set => SetProperty(ref _isCheckingStates, value);
+    }
 
     public bool CreateRestorePoint
     {
@@ -105,6 +112,7 @@ public class MainViewModel : BaseViewModel
     public ICommand MaxPerformanceCommand { get; }
     public ICommand ExtremePerformanceCommand { get; }
     public ICommand SelectCategoryCommand { get; }
+    public ICommand RefreshTweakStatesCommand { get; }
 
     public MainViewModel()
     {
@@ -117,10 +125,13 @@ public class MainViewModel : BaseViewModel
         ExportLogCommand = new RelayCommand(_ => ExportLog());
         RefreshSystemInfoCommand = new AsyncRelayCommand(
             async () => await SystemInfo.RefreshAsync());
+        RefreshTweakStatesCommand = new AsyncRelayCommand(
+            RefreshTweakStatesAsync,
+            () => !IsApplying && !IsCheckingStates);
 
         GamingPresetCommand = new RelayCommand(_ => ApplyPreset("Gaming Preset",
             "essential_gamedvr", "game_mode", "game_dvr_bar", "game_fso",
-            "game_power", "game_nagle", "game_gpu_sched", "game_cpu_prio",
+            "game_power", "game_gpu_sched", "game_cpu_prio",
             "game_xbox_svc", "essential_edge", "perf_cpu_100", "perf_responsiveness"));
 
         PrivacyPresetCommand = new RelayCommand(_ => ApplyPreset("Privacy Preset",
@@ -141,7 +152,7 @@ public class MainViewModel : BaseViewModel
             "perf_visual_effects", "perf_animations", "perf_transparency",
             "perf_superfetch", "perf_paging_exec", "perf_responsiveness",
             "perf_cpu_priority", "perf_winsearch",
-            "ext_hpet", "ext_dynamictick", "ext_timer_res", "ext_mmcss",
+            "ext_hpet", "ext_dynamictick", "ext_mmcss",
             "ext_cpu_sched"));
 
         SelectCategoryCommand = new RelayCommand(param =>
@@ -179,6 +190,7 @@ public class MainViewModel : BaseViewModel
 
         AddLog("Uaskus Tweaks started. Running as " + (IsAdmin ? "Administrator." : "Standard User."),
             IsAdmin ? LogLevel.Success : LogLevel.Warning);
+        _ = RefreshTweakStatesAsync();
     }
 
     private void ApplyPreset(string presetName, params string[] tweakIds)
@@ -249,6 +261,7 @@ public class MainViewModel : BaseViewModel
 
             AddLog($"Done. {ok} succeeded, {fail} failed.", fail > 0 ? LogLevel.Warning : LogLevel.Success);
             StatusText = $"Complete: {ok} succeeded, {fail} failed.";
+            await RefreshTweakStatesAsync(silent: true);
 
             if (anyRestart)
             {
@@ -263,6 +276,44 @@ public class MainViewModel : BaseViewModel
         finally
         {
             IsApplying = false;
+        }
+    }
+
+    private async Task RefreshTweakStatesAsync() => await RefreshTweakStatesAsync(silent: false);
+
+    private async Task RefreshTweakStatesAsync(bool silent)
+    {
+        if (IsCheckingStates)
+            return;
+
+        IsCheckingStates = true;
+        if (!silent)
+        {
+            StatusText = "Checking current tweak states…";
+            AddLog("Checking the current state of registry and service tweaks…", LogLevel.Info);
+        }
+
+        try
+        {
+            var tweaks = Categories.SelectMany(category => category.Tweaks).ToList();
+            foreach (var tweak in tweaks)
+                tweak.State = await _stateDetector.CheckAsync(tweak.Model);
+
+            var active = tweaks.Count(tweak => tweak.State == TweakState.Enabled);
+            if (!silent)
+            {
+                StatusText = $"State check complete: {active} active.";
+                AddLog($"State check complete: {active} tweak(s) fully active.", LogLevel.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusText = "Could not complete state check.";
+            AddLog($"State check failed: {ex.Message}", LogLevel.Warning);
+        }
+        finally
+        {
+            IsCheckingStates = false;
         }
     }
 

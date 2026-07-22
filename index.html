@@ -3,127 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uaskus Tweaker - The Ultimate Windows Debloater</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Uaskus Tweaker is a free Windows 10 and 11 utility for reviewing performance, privacy, and gaming tweaks.">
+    <title>Uaskus Tweaker — Take control of Windows</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="site.js" defer></script>
 </head>
 <body>
-    <!-- Navigation -->
+    <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+    <div class="site-noise" aria-hidden="true"></div>
+
     <nav>
         <div class="nav-container">
-            <a href="index.html" class="logo">Uaskus Tweaker</a>
+            <a href="index.html" class="logo"><span class="logo-mark">U</span>Uaskus <em>Tweaker</em></a>
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
-                <li><a href="#download">Download</a></li>
                 <li><a href="guide.html">Guide</a></li>
-                <li><a href="aboutme.html">About Me</a></li>
-                <li><a href="https://www.tiktok.com/@uaskustweaker">🎵 TikTok</a></li>
-                <li><a href="https://discord.gg/GRCdvgtX">💬 Discord</a></li>
+                <li><a href="aboutme.html">About</a></li>
+                <li><a href="https://discord.gg/GRCdvgtX">Discord</a></li>
             </ul>
+            <a href="#download" class="nav-download">Get the app <span>↗</span></a>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <span class="hero-badge">🏆 Chris Titus Approved</span>
-            <h1>The Ultimate Gaming Performance Utility</h1>
-            <p class="hero-tagline">⚡ Guaranteed Performance Increase ⚡</p>
-            <p>Uaskus Tweaker strips away Windows bloatware, disables telemetry, and optimizes your system for peak performance. Now featuring a modern WPF graphical interface – take back control of your PC with one powerful tool.</p>
-            <div class="btn-group">
-                <a href="#download" class="btn btn-primary">⬇ Download Now</a>
-                <a href="#features" class="btn btn-secondary">Learn More</a>
+    <main>
+        <section class="hero">
+            <div class="hero-content reveal">
+                <p class="eyebrow"><span></span> Windows 10 + 11 utility</p>
+                <h1>Make Windows feel<br><i>like yours again.</i></h1>
+                <p class="hero-copy">A focused, no-nonsense desktop utility for reviewing Windows tweaks, cutting distractions, and building a setup that works for you.</p>
+                <div class="btn-group">
+                    <a href="#download" class="btn btn-primary">Download for Windows <span>↓</span></a>
+                    <a href="#features" class="text-link">Explore what it does <span>→</span></a>
+                </div>
+                <div class="trust-row">
+                    <span>Windows 10 / 11</span><span>•</span><span>Self-contained .exe</span><span>•</span><span>Free to use</span>
+                </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <h2 class="section-title">Powerful Features</h2>
-        <p class="section-subtitle">Everything you need to optimize your Windows experience</p>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Performance Boost</h3>
-                <p>Optimize CPU, memory, and disk usage for faster system responsiveness and improved gaming performance.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🔒</div>
-                <h3>Kill Telemetry</h3>
-                <p>Shut down Microsoft's data collection, disable tracking services, and stop Windows from phoning home. Your PC, your privacy.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🧹</div>
-                <h3>Deep Debloating</h3>
-                <p>Surgically remove Candy Crush, Xbox apps, Cortana, and dozens of other pre-installed Windows bloatware with one click.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🎮</div>
-                <h3>Gaming Optimizations</h3>
-                <p>Apply tweaks specifically designed to reduce input lag and improve frame rates in games.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🔧</div>
-                <h3>System Tweaks</h3>
-                <p>Access hidden Windows settings and apply proven optimizations with just one click.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">💾</div>
-                <h3>Backup & Restore</h3>
-                <p>Create system restore points before applying changes so you can always revert if needed.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Download Section -->
-    <section class="download" id="download">
-        <div class="download-box">
-            <span class="version-tag">v2.0.0 - WPF Edition</span>
-            <h2>Download Uaskus Tweaker</h2>
-            <p>Free, open source Windows optimizer with a modern GUI. No installation required – just extract and run!</p>
-            <a href="https://github.com/maskus89/uaskus-tweaker/releases/latest/download/UaskusTweaks.zip" class="btn btn-primary">⬇ Download for Windows</a>
-            
-            <div class="system-requirements">
-                <h4>System Requirements</h4>
-                <ul>
-                    <li>Windows 10 or Windows 11 (64-bit)</li>
-                    <li>Administrator privileges</li>
-                    <li>No additional runtime required (self-contained .exe)</li>
-                    <li>50 MB free disk space</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Endorsement Section -->
-    <section class="endorsement">
-        <div class="endorsement-content">
-            <div class="endorsement-quote">
-                <span class="quote-mark">"</span>
-                <p>This is exactly what Windows needs. Clean, effective, and doesn't break your system. Highly recommended for anyone tired of Microsoft's bloatware.</p>
-                <div class="endorsement-author">
-                    <div class="author-avatar">CT</div>
-                    <div class="author-info">
-                        <strong>Chris Titus</strong>
-                        <span>Tech YouTuber & Linux Advocate</span>
+            <div class="app-preview reveal" aria-label="Illustration of Uaskus Tweaker">
+                <div class="window-glow"></div>
+                <div class="app-window">
+                    <div class="app-titlebar"><span class="app-logo">⚡</span><strong>UASKUS TWEAKS</strong><small>v2.1</small><div class="app-dots"><i></i><i></i><i></i></div></div>
+                    <div class="app-body">
+                        <aside><b>QUICK START</b><button>Gaming</button><button>Privacy</button><button>Performance</button><hr><a class="active">⚙ Essential</a><a>⚡ Performance</a><a>🔒 Privacy</a><a>🎮 Gaming</a></aside>
+                        <div class="app-main"><div class="app-head"><div><b>⚙ Essential Tweaks</b><small>Safe, recommended tweaks for every Windows installation.</small></div><span>↻ Check state</span></div><div class="tweak-row"><i></i><div><b>Disable Telemetry</b><small>Stops Microsoft from collecting usage data.</small></div><label class="is-active">ACTIVE</label><em>LOW</em></div><div class="tweak-row"><i></i><div><b>Disable Game DVR</b><small>Turn off background recording.</small></div><label>OFF</label><em>LOW</em></div><div class="tweak-row"><i></i><div><b>Show File Extensions</b><small>See complete file names in Explorer.</small></div><label class="is-active">ACTIVE</label><em>LOW</em></div><div class="app-status">Ready <button>▶ Apply Selected</button></div></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer -->
+        <section class="features" id="features">
+            <div class="section-heading reveal"><p class="eyebrow"><span></span> Built for control</p><h2>Useful tools. Clear choices.</h2><p>Every change is grouped, explained, and marked with a risk level so you can decide what belongs on your machine.</p></div>
+            <div class="features-grid">
+                <article class="feature-card reveal"><div class="feature-number">01</div><div class="feature-icon">⌁</div><h3>Performance</h3><p>Review CPU, memory, power, and visual settings from one calm, organized place.</p></article>
+                <article class="feature-card reveal"><div class="feature-number">02</div><div class="feature-icon">◉</div><h3>Privacy</h3><p>Reduce telemetry, ads, activity tracking, and unwanted background behaviour.</p></article>
+                <article class="feature-card reveal"><div class="feature-number">03</div><div class="feature-icon">✦</div><h3>Gaming presets</h3><p>Start from a gaming, privacy, or performance preset, then make it your own.</p></article>
+                <article class="feature-card reveal"><div class="feature-number">04</div><div class="feature-icon">✓</div><h3>State checks</h3><p>See which registry and service tweaks are already active before you change anything.</p></article>
+            </div>
+        </section>
+
+        <section class="download" id="download">
+            <div class="download-box reveal">
+                <p class="eyebrow"><span></span> Ready when you are</p>
+                <h2>Set up your Windows.<br><i>Your way.</i></h2>
+                <p>Download the latest release, extract it, and run it as administrator. Create a restore point before applying changes.</p>
+                <a href="https://github.com/maskus89/uaskus-tweaker/releases/latest/download/UaskusTweaks.zip" class="btn btn-primary">Download Uaskus Tweaker <span>↓</span></a>
+                <div class="requirements"><span>Windows 10/11</span><span>64-bit</span><span>Admin required</span></div>
+            </div>
+        </section>
+    </main>
+
     <footer>
-        <div class="footer-links">
-            <a href ="index.html">Home</a>
-        </div>
-        <p class="copyright">© 2026 Uaskus Tweaker. All rights reserved.</p>
+        <div class="footer-brand"><a href="index.html" class="logo"><span class="logo-mark">U</span>Uaskus <em>Tweaker</em></a><p>A personal Windows tweaking utility by maskus.</p></div>
+        <p class="attribution">Inspired by the Chris Titus Tech Windows Utility. Uaskus Tweaker is an independent project and is not affiliated with, endorsed by, or approved by Chris Titus Tech.</p>
+        <p class="copyright">© 2026 Uaskus Tweaker</p>
     </footer>
 </body>
 </html>

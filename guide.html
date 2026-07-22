@@ -3,269 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guide - Uaskus Tweaker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="A practical guide to using the Uaskus Tweaker desktop application.">
+    <title>Guide — Uaskus Tweaker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="site.js" defer></script>
     <style>
-        .guide-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 8rem 2rem 4rem;
-        }
-
-        .guide-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .guide-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #fff, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .guide-header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .guide-section {
-            background: var(--dark-light);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(99, 102, 241, 0.2);
-        }
-
-        .guide-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .step-number {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .guide-section p {
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-        }
-
-        .guide-section ul {
-            list-style: none;
-            color: var(--text-muted);
-        }
-
-        .guide-section li {
-            padding: 0.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .key {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 40px;
-            height: 36px;
-            padding: 0 0.75rem;
-            background: var(--dark);
-            border: 1px solid rgba(99, 102, 241, 0.4);
-            border-radius: 6px;
-            font-weight: 600;
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: var(--accent);
-        }
-
-        .warning-box {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .warning-box h4 {
-            color: #fbbf24;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .warning-box p {
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-bottom: 2rem;
-            transition: color 0.3s;
-        }
-
-        .back-link:hover {
-            color: var(--accent);
-        }
-
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .control-item {
-            background: var(--dark);
-            padding: 1rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+        .guide-container { max-width: 860px; margin: 0 auto; padding: 8.5rem 2rem 5rem; }
+        .guide-header { max-width: 620px; margin: 0 auto 3.5rem; text-align: center; }
+        .guide-header h1 { margin: 1rem 0; font-size: clamp(2.6rem, 6vw, 4.4rem); line-height: 1; letter-spacing: -.07em; }
+        .guide-header > p:last-child { color: var(--text-muted); line-height: 1.8; }
+        .guide-section { padding: clamp(1.35rem, 4vw, 2.25rem); margin-bottom: 1rem; border: 1px solid rgba(151, 158, 255, .18); border-radius: .85rem; background: linear-gradient(145deg, rgba(32,34,61,.82), rgba(20,22,41,.74)); }
+        .guide-section h2 { display: flex; align-items: center; gap: .75rem; margin-bottom: .8rem; font-size: 1.2rem; letter-spacing: -.03em; }
+        .step-number { display: grid; place-items: center; flex: 0 0 auto; width: 2rem; height: 2rem; border: 1px solid rgba(113,231,255,.4); border-radius: .55rem; color: var(--accent); background: rgba(113,231,255,.08); font: .75rem 'DM Mono', monospace; }
+        .guide-section > p, .guide-section li { color: var(--text-muted); line-height: 1.75; }
+        .guide-section ul { margin-top: .7rem; padding: 0; list-style: none; }.guide-section li { position: relative; padding: .38rem 0 .38rem 1.25rem; }.guide-section li::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+        .controls-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .65rem; margin-top: 1rem; }.control-item { padding: .8rem; border: 1px solid rgba(151,158,255,.14); border-radius: .55rem; background: rgba(13,15,30,.45); color: var(--text-muted); font-size: .8rem; }.control-item strong { display: block; margin-bottom: .2rem; color: var(--text); }.key { display: inline-block; margin-right: .4rem; color: var(--accent); font-family: 'DM Mono', monospace; }
+        .status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin-top: 1rem; }.status { padding: .65rem .45rem; border-radius: .45rem; text-align: center; font: .59rem 'DM Mono', monospace; }.status b { display: block; margin-bottom: .25rem; font-size: .64rem; }.active { color: #b9f5d3; background: #1d5145; }.partial { color: #ffe2a7; background: #62471d; }.off { color: #bfdcff; background: #293c5a; }.na { color: #c0c2d4; background: #34364d; }
+        .warning-box { margin-top: 1rem; padding: 1rem; border: 1px solid rgba(245, 158, 11, .35); border-radius: .55rem; background: rgba(245, 158, 11, .08); }.warning-box h3 { margin-bottom: .35rem; color: #ffd071; font-size: .85rem; }.warning-box p { color: #d7c39a; font-size: .82rem; line-height: 1.65; }
+        .back-link { display: inline-flex; gap: .5rem; margin-bottom: 2.5rem; color: var(--text-muted); font-size: .78rem; text-decoration: none; }.back-link:hover { color: var(--accent); }
+        @media (max-width: 600px) { .guide-container { padding: 7rem 1.15rem 3rem; }.controls-grid, .status-grid { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <a href="index.html" class="logo">Uaskus Tweaker</a>
-            <ul class="nav-links">
-                <li><a href="index.html#features">Features</a></li>
-                <li><a href="index.html#download">Download</a></li>
-                <li><a href="guide.html">Guide</a></li>
-                <li><a href="aboutme.html">About Me</a></li>
-                <li><a href="https://www.tiktok.com/@uaskustweaker">🎵 TikTok</a></li>
-                <li><a href="https://discord.gg/GRCdvgtX">💬 Discord</a></li>
-            </ul>
-        </div>
-    </nav>
+    <canvas id="ambient-canvas" aria-hidden="true"></canvas><div class="site-noise" aria-hidden="true"></div>
+    <nav><div class="nav-container"><a href="index.html" class="logo"><span class="logo-mark">U</span>Uaskus <em>Tweaker</em></a><ul class="nav-links"><li><a href="index.html#features">Features</a></li><li><a href="guide.html">Guide</a></li><li><a href="aboutme.html">About</a></li><li><a href="https://discord.gg/GRCdvgtX">Discord</a></li></ul><a href="index.html#download" class="nav-download">Get the app <span>↗</span></a></div></nav>
 
-    <div class="guide-container">
-        <a href="index.html" class="back-link">← Back to Home</a>
-        
-        <div class="guide-header">
-            <h1>📖 User Guide</h1>
-            <p>Learn how to use Uaskus Tweaker v2.0.0 WPF Edition to optimize your Windows system</p>
-        </div>
+    <main class="guide-container">
+        <a href="index.html" class="back-link">← Back to home</a>
+        <header class="guide-header reveal"><p class="eyebrow"><span></span> Desktop app guide</p><h1>Use the app<br><i>with confidence.</i></h1><p>This guide covers the current Uaskus Tweaker WPF application—not the earlier batch file.</p></header>
 
-        <!-- Step 1: Run as Administrator -->
-        <div class="guide-section">
-            <h2><span class="step-number">1</span> Run as Administrator</h2>
-            <p>Uaskus Tweaker requires administrator privileges to modify system settings and apply optimizations.</p>
-            <ul>
-                <li>Right-click on <strong>UaskusTweaker.exe</strong></li>
-                <li>Select <strong>"Run as administrator"</strong></li>
-                <li>Click <strong>Yes</strong> when prompted by User Account Control (UAC)</li>
-            </ul>
-            <div class="warning-box">
-                <h4>⚠️ Important</h4>
-                <p>The program will not function correctly without administrator privileges. Always run as admin!</p>
-            </div>
-        </div>
+        <section class="guide-section reveal">
+            <h2><span class="step-number">01</span> Start with the right permissions</h2>
+            <p>Right-click <strong>UaskusTweaks.exe</strong> and choose <strong>Run as administrator</strong>. Windows needs administrator permission for system-wide registry, service, network, and boot settings.</p>
+            <div class="warning-box"><h3>Admin is required for system changes</h3><p>You can browse the app without elevation, but changes that need administrator access may fail. The title bar shows whether the app is running as admin.</p></div>
+        </section>
 
-        <!-- Step 2: Navigation -->
-        <div class="guide-section">
-            <h2><span class="step-number">2</span> Navigate the GUI</h2>
-            <p>Uaskus Tweaker features a modern graphical interface. Use the sidebar to switch between tweak categories.</p>
-            
-            <div class="controls-grid">
-                <div class="control-item">
-                    <span class="key">🚀</span>
-                    <span>Essential Tweaks (Recommended)</span>
-                </div>
-                <div class="control-item">
-                    <span class="key">⚡</span>
-                    <span>Performance Tweaks</span>
-                </div>
-                <div class="control-item">
-                    <span class="key">🔒</span>
-                    <span>Privacy Tweaks</span>
-                </div>
-                <div class="control-item">
-                    <span class="key">🌐</span>
-                    <span>Network Tweaks</span>
-                </div>
-                <div class="control-item">
-                    <span class="key">🧹</span>
-                    <span>Debloat Windows</span>
-                </div>
-                <div class="control-item">
-                    <span class="key">🎮</span>
-                    <span>Gaming Tweaks</span>
-                </div>
-            </div>
-        </div>
+        <section class="guide-section reveal">
+            <h2><span class="step-number">02</span> Check what is already active</h2>
+            <p>Use <strong>↻ Check state</strong> in the category header. It reads applicable registry values and service start modes without changing anything.</p>
+            <div class="status-grid"><div class="status active"><b>ACTIVE</b>Every setting verified</div><div class="status partial"><b>PARTIAL</b>Some settings match</div><div class="status off"><b>OFF</b>Setting does not match</div><div class="status na"><b>CHECK N/A</b>Cannot be verified safely</div></div>
+            <p style="margin-top:1rem">Some actions, such as flushing DNS or applying a one-time command, do not have a reliable persistent state. They intentionally show <strong>CHECK N/A</strong> instead of a guess.</p>
+        </section>
 
-        <!-- Step 3: Apply Tweaks -->
-        <div class="guide-section">
-            <h2><span class="step-number">3</span> Apply Tweaks</h2>
-            <p>Each tweak is displayed with a name, description, and risk indicator. Check the tweaks you want to apply, then click the <strong>Apply</strong> button.</p>
-            <ul>
-                <li>Read the description of each tweak before enabling it</li>
-                <li>Some tweaks require a system restart to take effect</li>
-                <li>Use <strong>Select All</strong> to enable all tweaks in a category</li>
-                <li>Applied tweaks are shown in the built-in log panel</li>
-            </ul>
-        </div>
+        <section class="guide-section reveal">
+            <h2><span class="step-number">03</span> Find and choose tweaks</h2>
+            <p>Select a category in the left sidebar, or use the search box to filter the current category. Turn on only the tweaks you have read and understand.</p>
+            <div class="controls-grid"><div class="control-item"><strong><span class="key">⚙</span>Essential</strong>Lower-risk starting points.</div><div class="control-item"><strong><span class="key">🔒</span>Privacy</strong>Telemetry and data-sharing controls.</div><div class="control-item"><strong><span class="key">⚡</span>Performance</strong>Power, visual, and responsiveness settings.</div><div class="control-item"><strong><span class="key">🎮</span>Gaming</strong>Gaming-specific controls and services.</div></div>
+            <p style="margin-top:1rem">The risk badge is there for a reason: low-risk changes are generally easier to reverse, while high and critical changes need extra care.</p>
+        </section>
 
-        <!-- Step 4: Create Restore Point -->
-        <div class="guide-section">
-            <h2><span class="step-number">4</span> Restore Point (Recommended)</h2>
-            <p>We highly recommend creating a system restore point before applying any tweaks. <strong>Uaskus Tweaker will automatically offer to create one when the program starts</strong> – just click Yes when prompted!</p>
-            <ul>
-                <li>When the program launches, a dialog will offer to create a restore point</li>
-                <li>Click <strong>Yes</strong> to let the program create a backup automatically</li>
-                <li>This only takes a few seconds and can save you from potential issues</li>
-                <li>If something goes wrong, you can easily restore your system to its previous state</li>
-            </ul>
-            <div class="warning-box">
-                <h4>⚠️ Strongly Recommended</h4>
-                <p>Always allow the program to create a restore point before making any changes. It's your safety net!</p>
-            </div>
-        </div>
+        <section class="guide-section reveal">
+            <h2><span class="step-number">04</span> Use a preset as a starting point</h2>
+            <p>The <strong>Gaming</strong>, <strong>Privacy</strong>, <strong>Performance</strong>, and <strong>Extreme</strong> buttons in Quick Start select a group of relevant tweaks. They do not apply anything by themselves.</p>
+            <ul><li>Choose a preset, then review its selected tweaks across the categories.</li><li>Deselect anything that does not fit your PC or how you use Windows.</li><li>Use <strong>Preview</strong> to read the selected list before applying it.</li></ul>
+            <div class="warning-box"><h3>Be especially careful with Extreme</h3><p>Extreme settings can affect power use, stability, compatibility, and startup behaviour. They are not recommended as a default setup.</p></div>
+        </section>
 
-        <!-- Tips -->
-        <div class="guide-section">
-            <h2>💡 Pro Tips</h2>
-            <ul>
-                <li>🎮 <strong>For Gaming:</strong> Apply all tweaks in the "Gaming Optimizations" section</li>
-                <li>🔒 <strong>For Privacy:</strong> Use "Privacy Settings" to disable telemetry</li>
-                <li>⚡ <strong>For Speed:</strong> Combine "Performance Tweaks" with "Debloat Windows"</li>
-                <li>💾 <strong>Always Backup:</strong> Create a restore point before making changes</li>
-            </ul>
-        </div>
-    </div>
+        <section class="guide-section reveal">
+            <h2><span class="step-number">05</span> Apply, verify, and restart if asked</h2>
+            <p>Click <strong>Apply Selected</strong> in the bottom-right corner. The app creates a system restore point before applying your selected tweaks, then writes each result to the log panel.</p>
+            <ul><li>Watch the log for successful and failed commands.</li><li>Use <strong>Export Log</strong> if you want to save a copy to your desktop.</li><li>Run <strong>Check state</strong> again when the operation completes.</li><li>Restart only when the app says a selected tweak requires it.</li></ul>
+        </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-links">
-            <a href="index.html">Home</a>
-            <a href="#">Documentation</a>
-            <a href="#">GitHub</a>
-            <a href="#">Support</a>
-        </div>
-        <p class="copyright">© 2026 Uaskus Tweaker. All rights reserved.</p>
-    </footer>
+        <section class="guide-section reveal">
+            <h2><span class="step-number">06</span> If something is not right</h2>
+            <p>Use the Windows System Restore point created before the changes to return to an earlier state. If a change simply needs a reboot, restart first and check its state again.</p>
+            <div class="warning-box"><h3>A good rule of thumb</h3><p>Apply a small group of changes at a time, especially on a gaming or work PC. It makes it much easier to identify and reverse a setting that does not suit your system.</p></div>
+        </section>
+    </main>
+
+    <footer><div class="footer-brand"><a href="index.html" class="logo"><span class="logo-mark">U</span>Uaskus <em>Tweaker</em></a><p>A personal Windows tweaking utility by maskus.</p></div><p class="attribution">Inspired by the Chris Titus Tech Windows Utility. Uaskus Tweaker is an independent project and is not affiliated with, endorsed by, or approved by Chris Titus Tech.</p><p class="copyright">© 2026 Uaskus Tweaker</p></footer>
 </body>
 </html>

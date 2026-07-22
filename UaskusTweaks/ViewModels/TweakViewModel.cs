@@ -7,6 +7,7 @@ public class TweakViewModel : BaseViewModel
 {
     private bool _isSelected;
     private System.Windows.Media.Brush? _riskColor;
+    private TweakState _state = TweakState.Unknown;
 
     public Tweak Model { get; }
 
@@ -20,6 +21,35 @@ public class TweakViewModel : BaseViewModel
     public bool IsAdminRequired => Model.IsAdminRequired;
     public bool RequiresRestart => Model.RequiresRestart;
     public string Tooltip => Model.Tooltip;
+
+    public TweakState State
+    {
+        get => _state;
+        set
+        {
+            if (SetProperty(ref _state, value))
+            {
+                OnPropertyChanged(nameof(StateText));
+                OnPropertyChanged(nameof(StateColor));
+            }
+        }
+    }
+
+    public string StateText => State switch
+    {
+        TweakState.Enabled => "ACTIVE",
+        TweakState.PartiallyEnabled => "PARTIAL",
+        TweakState.NotEnabled => "OFF",
+        _ => "CHECK N/A"
+    };
+
+    public Brush StateColor => State switch
+    {
+        TweakState.Enabled => new SolidColorBrush(Color.FromRgb(0x22, 0xc5, 0x5e)),
+        TweakState.PartiallyEnabled => new SolidColorBrush(Color.FromRgb(0xf5, 0x9e, 0x0b)),
+        TweakState.NotEnabled => new SolidColorBrush(Color.FromRgb(0x60, 0xa5, 0xfa)),
+        _ => new SolidColorBrush(Color.FromRgb(0x60, 0x60, 0x80))
+    };
 
     public bool IsSelected
     {

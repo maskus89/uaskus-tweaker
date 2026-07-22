@@ -4,6 +4,22 @@ namespace UaskusTweaks.Services;
 
 public class RegistryService
 {
+    public bool TryGetValue(string keyPath, string valueName, out object? value, out RegistryValueKind kind)
+    {
+        var (hive, subKey) = ParsePath(keyPath);
+        using var key = hive.OpenSubKey(subKey, writable: false);
+        if (key is null || !key.GetValueNames().Contains(valueName, StringComparer.OrdinalIgnoreCase))
+        {
+            value = null;
+            kind = default;
+            return false;
+        }
+
+        value = key.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+        kind = key.GetValueKind(valueName);
+        return value is not null;
+    }
+
     public void SetValue(string keyPath, string valueName, object value, RegistryValueKind kind)
     {
         var (hive, subKey) = ParsePath(keyPath);
@@ -44,29 +60,37 @@ public class RegistryService
 
     private static (RegistryKey hive, string subKey) ParsePath(string path)
     {
-        if (path.StartsWith("HKLM\\", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith("HKEY_LOCAL_MACHINE\\", StringComparison.OrdinalIgnoreCase))
+        if (path.StartsWith("HKLM\\", StringComparison.OrdinalIgnoreCase))
         {
-            var sub = path.Substring(path.IndexOf('\\') + 1);
-            return (Registry.LocalMachine, sub);
+            return (Registry.LocalMachine, path[5..]);
         }
-        if (path.StartsWith("HKCU\\", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith("HKEY_CURRENT_USER\\", StringComparison.OrdinalIgnoreCase))
+        if (path.StartsWith("HKEY_LOCAL_MACHINE\\", StringComparison.OrdinalIgnoreCase))
         {
-            var sub = path.Substring(path.IndexOf('\\') + 1);
-            return (Registry.CurrentUser, sub);
+            return (Registry.LocalMachine, path[19..]);
         }
-        if (path.StartsWith("HKCR\\", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith("HKEY_CLASSES_ROOT\\", StringComparison.OrdinalIgnoreCase))
+        if (path.StartsWith("HKCU\\", StringComparison.OrdinalIgnoreCase))
         {
-            var sub = path.Substring(path.IndexOf('\\') + 1);
-            return (Registry.ClassesRoot, sub);
+            return (Registry.CurrentUser, path[5..]);
         }
-        if (path.StartsWith("HKU\\", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith("HKEY_USERS\\", StringComparison.OrdinalIgnoreCase))
+        if (path.StartsWith("HKEY_CURRENT_USER\\", StringComparison.OrdinalIgnoreCase))
         {
-            var sub = path.Substring(path.IndexOf('\\') + 1);
-            return (Registry.Users, sub);
+            return (Registry.CurrentUser, path[18..]);
+        }
+        if (path.StartsWith("HKCR\\", StringComparison.OrdinalIgnoreCase))
+        {
+            return (Registry.ClassesRoot, path[5..]);
+        }
+        if (path.StartsWith("HKEY_CLASSES_ROOT\\", StringComparison.OrdinalIgnoreCase))
+        {
+            return (Registry.ClassesRoot, path[18..]);
+        }
+        if (path.StartsWith("HKU\\", StringComparison.OrdinalIgnoreCase))
+        {
+            return (Registry.Users, path[4..]);
+        }
+        if (path.StartsWith("HKEY_USERS\\", StringComparison.OrdinalIgnoreCase))
+        {
+            return (Registry.Users, path[10..]);
         }
         throw new ArgumentException($"Unknown registry hive in path: {path}");
     }
