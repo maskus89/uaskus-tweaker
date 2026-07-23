@@ -68,13 +68,6 @@ public static class TweakDefinitions
                 Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "SubscribedContentEnabled", 0),
                 Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "SystemPaneSuggestionsEnabled", 0)),
 
-            Tweak("essential_gamedvr", "Disable Game DVR",
-                "Disables Xbox Game DVR background recording.",
-                "Game DVR consumes GPU and CPU resources in the background even when you are not recording. Disabling it frees resources for gaming.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\System\\GameConfigStore", "GameDVR_Enabled", 0),
-                Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR", "AllowGameDVR", 0)),
-
             Tweak("essential_hibernate", "Disable Hibernation",
                 "Removes the hiberfil.sys file and disables hibernate.",
                 "Frees disk space used by hibernation file (usually equal to installed RAM). Run 'powercfg -h on' to re-enable.",
@@ -143,12 +136,6 @@ public static class TweakDefinitions
                 RiskLevel.Medium, false, false,
                 Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications", "GlobalUserDisabled", 1)),
 
-            Tweak("adv_fso", "Disable Fullscreen Optimizations",
-                "Disables fullscreen optimizations for better gaming performance.",
-                "Windows Fullscreen Optimizations can cause input lag in games. Disabling may improve frame times.",
-                RiskLevel.Medium, false, false,
-                Reg("HKCU\\System\\GameConfigStore", "GameDVR_DXGIHonorFSEWindowsCompatible", 1)),
-
             Tweak("adv_ipv6_disable", "Completely Disable IPv6",
                 "Fully disables IPv6 on all adapters.",
                 "Sets DisabledComponents to 255 to disable all IPv6 components. Only do this if you don't use IPv6.",
@@ -174,12 +161,6 @@ public static class TweakDefinitions
                 RiskLevel.Low, false, false,
                 Reg("HKCU\\Software\\Classes\\CLSID\\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}", "System.IsPinnedToNameSpaceTree", 0),
                 Reg("HKCU\\Software\\Classes\\CLSID\\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}", "System.IsPinnedToNameSpaceTree", 0)),
-
-            Tweak("adv_classic_menu", "Enable Classic Right-Click Menu",
-                "Restores the Windows 10-style right-click context menu.",
-                "Removes the Windows 11 simplified context menu and restores the full classic menu directly.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32", "", "", RegistryValueKind.String)),
 
         });
 
@@ -305,14 +286,6 @@ public static class TweakDefinitions
                 Svc("DiagTrack", "disabled"),
                 Svc("dmwappushservice", "disabled")),
 
-            Tweak("priv_activity", "Disable Activity History",
-                "Prevents tracking of your app and file usage.",
-                "Disables the activity feed and prevents user activities from being published or uploaded.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "EnableActivityFeed", 0),
-                Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "PublishUserActivities", 0),
-                Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "UploadUserActivities", 0)),
-
             Tweak("priv_adid", "Disable Advertising ID",
                 "Prevents apps from using your Advertising ID.",
                 "Each Windows installation has a unique Advertising ID used to serve targeted ads. Disabling it stops this tracking.",
@@ -330,12 +303,6 @@ public static class TweakDefinitions
                 "Sets NumberOfSIUFInPeriod=0 which prevents the Windows Feedback experience from ever appearing.",
                 RiskLevel.Low, false, false,
                 Reg("HKCU\\Software\\Microsoft\\Siuf\\Rules", "NumberOfSIUFInPeriod", 0)),
-
-            Tweak("priv_timeline", "Disable Timeline",
-                "Disables the Windows Timeline (Task View history) feature.",
-                "Disables the activity feed used by Timeline, preventing history collection.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "EnableActivityFeed", 0)),
 
             Tweak("priv_websearch", "Disable Web Search Suggestions",
                 "Stops Bing from appearing in Start menu search.",
@@ -404,18 +371,6 @@ public static class TweakDefinitions
                 Reg("HKLM\\SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings", "ActiveHoursStart", 8),
                 Reg("HKLM\\SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings", "ActiveHoursEnd", 23)),
 
-            Tweak("game_gpu_sched", "Enable Hardware GPU Scheduling",
-                "Enables WDDM 2.7 hardware-accelerated GPU scheduling.",
-                "Reduces GPU-induced input lag by offloading scheduling to the GPU itself.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers", "HwSchMode", 2)),
-
-            Tweak("game_cpu_prio", "Optimize CPU Priority for Games",
-                "Maximizes foreground thread priority boost.",
-                "Win32PrioritySeparation=38 gives the active game maximum CPU time slices.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl", "Win32PrioritySeparation", 38)),
-
             Tweak("game_xbox_svc", "Disable Xbox Services",
                 "Fully disables all Xbox background services.",
                 "Disables XblAuthManager, XblGameSave, XboxNetApiSvc, and XboxGipSvc which are unneeded without Xbox features.",
@@ -438,12 +393,6 @@ public static class TweakDefinitions
                 RiskLevel.Low, true, false,
                 Cmd("ipconfig /flushdns")),
 
-            Tweak("net_throttle", "Disable Network Throttling",
-                "Removes Windows multimedia network throttling.",
-                "NetworkThrottlingIndex=0xffffffff disables the mechanism that reduces network throughput during media playback.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile", "NetworkThrottlingIndex", unchecked((int)0xffffffff))),
-
             Tweak("net_tcp_optimize", "Optimize TCP Settings",
                 "Enables auto-tuning, chimney, and other TCP optimizations.",
                 "Applies netsh commands to enable TCP autotuning, chimney offload, DCA, and NetDMA for better throughput.",
@@ -459,12 +408,6 @@ public static class TweakDefinitions
                 RiskLevel.Low, true, false,
                 NetSh("int tcp set global timestamps=enabled"),
                 NetSh("int tcp set global rss=enabled")),
-
-            Tweak("net_ipv4_prefer", "Prefer IPv4 over IPv6",
-                "Configures Windows to prefer IPv4 connections.",
-                "Sets DisabledComponents=32 which makes IPv4 preferred while keeping IPv6 functional.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters", "DisabledComponents", 32)),
 
             Tweak("net_qos", "Disable QoS Bandwidth Reservation",
                 "Removes the 20% bandwidth reservation for QoS.",
@@ -613,49 +556,6 @@ public static class TweakDefinitions
                 Reg("HKCU\\Control Panel\\Mouse", "MouseThreshold1", "0", RegistryValueKind.String),
                 Reg("HKCU\\Control Panel\\Mouse", "MouseThreshold2", "0", RegistryValueKind.String)),
 
-            Tweak("cust_bing_start", "Disable Bing in Start Menu",
-                "Stops Bing web results from appearing in Start menu search.",
-                "BingSearchEnabled=0 keeps Start menu searches local.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "BingSearchEnabled", 0)),
-
-            Tweak("cust_websearch", "Disable Web Search Suggestions",
-                "Hides web suggestions in the search box.",
-                "Disables BingSearchEnabled and DisableSearchBoxSuggestions.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "BingSearchEnabled", 0),
-                Reg("HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer", "DisableSearchBoxSuggestions", 1)),
-
-            Tweak("cust_tailored", "Disable Tailored Experiences",
-                "Removes personalized tips and ads based on your data.",
-                "Disables TailoredExperiencesWithDiagnosticDataEnabled.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 0)),
-
-            Tweak("cust_taskbar_left", "Align Taskbar to Left",
-                "Moves the taskbar icons to the left side.",
-                "TaskbarAl=0 restores the classic left-aligned taskbar.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "TaskbarAl", 0)),
-
-            Tweak("cust_fileext", "Show File Extensions",
-                "Shows file extensions in Explorer.",
-                "HideFileExt=0 reveals full file names including extensions.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "HideFileExt", 0)),
-
-            Tweak("cust_hidden", "Show Hidden Files",
-                "Reveals hidden files and folders in Explorer.",
-                "Hidden=1 makes hidden items visible.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "Hidden", 1)),
-
-            Tweak("cust_snap", "Disable Snap Assist",
-                "Removes the snap layout popup when dragging windows.",
-                "WindowArrangementActive=0 disables snap layout suggestions.",
-                RiskLevel.Low, false, false,
-                Reg("HKCU\\Control Panel\\Desktop", "WindowArrangementActive", "0", RegistryValueKind.String)),
-
             Tweak("cust_bsod", "Show Detailed BSOD Info",
                 "Displays full stop code and parameters on blue screens.",
                 "DisplayParameters=1 shows the detailed crash parameters on the BSOD screen for easier diagnostics.",
@@ -701,12 +601,6 @@ public static class TweakDefinitions
                 RiskLevel.Low, true, false,
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\nvlddmkm\\Global\\NvTweak", "NvCplEnableHWAPI", 0),
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\amdkmpfd\\Parameters", "TelemetryEnabled", 0)),
-
-            Tweak("ext_cpu_sched", "CPU Scheduler Optimization",
-                "Maximizes CPU time for the foreground process.",
-                "Win32PrioritySeparation=38 is the same as perf_cpu_priority but placed here for extreme tuning bundles.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl", "Win32PrioritySeparation", 38)),
 
             Tweak("ext_pagefile", "Optimize Page File",
                 "Sets a fixed-size page file for predictable performance.",

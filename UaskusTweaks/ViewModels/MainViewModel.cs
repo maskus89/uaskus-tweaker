@@ -18,11 +18,13 @@ public class MainViewModel : BaseViewModel
     private readonly TweakExecutorService _executor = new();
     private readonly RestorePointService _restorePoint = new();
     private readonly TweakStateDetector _stateDetector = new();
+    private readonly TweakBackupService _backup = new();
 
     private TweakCategoryViewModel? _selectedCategory;
     private bool _isApplying;
     private bool _createRestorePoint = true;
     private bool _isCheckingStates;
+    private bool _hasUndoAvailable;
     private string _searchText = string.Empty;
     private string _statusText = "Ready";
 
@@ -54,6 +56,12 @@ public class MainViewModel : BaseViewModel
     }
 
     public bool CanApply => !_isApplying;
+
+    public bool HasUndoAvailable
+    {
+        get => _hasUndoAvailable;
+        private set => SetProperty(ref _hasUndoAvailable, value);
+    }
 
     public bool IsCheckingStates
     {
@@ -113,6 +121,7 @@ public class MainViewModel : BaseViewModel
     public ICommand ExtremePerformanceCommand { get; }
     public ICommand SelectCategoryCommand { get; }
     public ICommand RefreshTweakStatesCommand { get; }
+    public ICommand UndoLastApplyCommand { get; }
 
     public MainViewModel()
     {
@@ -128,23 +137,25 @@ public class MainViewModel : BaseViewModel
         RefreshTweakStatesCommand = new AsyncRelayCommand(
             RefreshTweakStatesAsync,
             () => !IsApplying && !IsCheckingStates);
+        UndoLastApplyCommand = new AsyncRelayCommand(UndoLastApplyAsync, () => !IsApplying && HasUndoAvailable);
+        HasUndoAvailable = _backup.HasBackup;
 
         GamingPresetCommand = new RelayCommand(_ => ApplyPreset("Gaming Preset",
-            "essential_gamedvr", "game_mode", "game_dvr_bar", "game_fso",
-            "game_power", "game_gpu_sched", "game_cpu_prio",
+            "game_mode", "game_dvr_bar", "game_fso", "game_power",
+            "perf_gpu_sched", "perf_cpu_priority",
             "game_xbox_svc", "essential_edge", "perf_cpu_100", "perf_responsiveness"));
 
         PrivacyPresetCommand = new RelayCommand(_ => ApplyPreset("Privacy Preset",
             "essential_telemetry", "essential_activity", "essential_consumer",
-            "priv_telemetry_svc", "priv_activity", "priv_adid", "priv_cortana",
-            "priv_feedback", "priv_timeline", "priv_websearch", "priv_tailored",
+            "priv_telemetry_svc", "priv_adid", "priv_cortana", "priv_feedback",
+            "priv_websearch", "priv_tailored",
             "priv_diagdata", "priv_errorreporting"));
 
         MaxPerformanceCommand = new RelayCommand(_ => ApplyPreset("Max Performance Preset",
             "perf_power_ultimate", "perf_core_parking", "perf_cpu_100",
             "perf_fast_startup", "perf_gpu_sched", "perf_animations",
             "perf_transparency", "perf_responsiveness", "perf_cpu_priority",
-            "essential_gamedvr", "essential_edge"));
+            "game_dvr_bar", "essential_edge"));
 
         ExtremePerformanceCommand = new RelayCommand(_ => ApplyPreset("EXTREME Performance Preset",
             "perf_power_ultimate", "perf_core_parking", "perf_cpu_throttle",
@@ -152,8 +163,7 @@ public class MainViewModel : BaseViewModel
             "perf_visual_effects", "perf_animations", "perf_transparency",
             "perf_superfetch", "perf_paging_exec", "perf_responsiveness",
             "perf_cpu_priority", "perf_winsearch",
-            "ext_hpet", "ext_dynamictick", "ext_mmcss",
-            "ext_cpu_sched"));
+            "ext_hpet", "ext_dynamictick", "ext_mmcss"));
 
         SelectCategoryCommand = new RelayCommand(param =>
         {
@@ -219,11 +229,40 @@ public class MainViewModel : BaseViewModel
             return;
         }
 
+        var conflicts = FindConflicts(selected);
+        if (conflicts.Count > 0)
+        {
+            AddLog("Conflicting selections blocked: " + string.Join(", ", conflicts), LogLevel.Warning);
+            MessageBox.Show("Two or more selected tweaks try to set the same setting to different values:\n\n" +
+                            string.Join("\n", conflicts) + "\n\nDeselect one before applying.",
+                "Conflicting tweaks", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var risky = selected.Where(t => t.RiskLevel is RiskLevel.High or RiskLevel.Critical).ToList();
+        if (risky.Count > 0)
+        {
+            var result = MessageBox.Show(
+                $"You selected {selected.Count} tweak(s), including {risky.Count} high-risk or critical tweak(s):\n\n" +
+                string.Join("\n", risky.Select(t => $"• [{t.RiskText}] {t.Name}")) +
+                "\n\nReview the Preview first if you are unsure. Continue?",
+                "Review high-risk tweaks", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes)
+                return;
+        }
+
         IsApplying = true;
         StatusText = "Applying tweaks…";
 
         try
         {
+            var backup = await _backup.CaptureAsync(selected.Select(t => t.Model));
+            _backup.Save(backup);
+            HasUndoAvailable = true;
+            AddLog($"Saved a rollback snapshot for {backup.RegistryEntries.Count} registry/service setting(s).", LogLevel.Success);
+            if (backup.UnsupportedCommandCount > 0)
+                AddLog($"{backup.UnsupportedCommandCount} command(s) cannot be automatically undone; the restore point remains the fallback.", LogLevel.Warning);
+
             if (CreateRestorePoint)
             {
                 AddLog("Creating system restore point…", LogLevel.Info);
@@ -277,6 +316,56 @@ public class MainViewModel : BaseViewModel
         {
             IsApplying = false;
         }
+    }
+
+    private async Task UndoLastApplyAsync()
+    {
+        var result = MessageBox.Show(
+            "This restores registry values and service startup settings saved before the most recent apply operation. " +
+            "One-time commands and removed apps cannot be restored this way. Continue?",
+            "Undo last apply", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes)
+            return;
+
+        IsApplying = true;
+        StatusText = "Restoring the last saved settings…";
+        try
+        {
+            var (success, restored, message) = await _backup.RestoreLastAsync();
+            AddLog(success ? message : $"Undo failed: {message}", success ? LogLevel.Success : LogLevel.Error);
+            StatusText = success ? $"Restored {restored} saved setting(s)." : "Undo failed.";
+            if (success) await RefreshTweakStatesAsync(silent: true);
+        }
+        finally
+        {
+            IsApplying = false;
+        }
+    }
+
+    private static List<string> FindConflicts(IEnumerable<TweakViewModel> tweaks)
+    {
+        var valuesByTarget = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var command in tweaks.SelectMany(tweak => tweak.Model.Commands))
+        {
+            string? target = null;
+            string? value = null;
+            var parts = command.Command.Split('|');
+            if (command.Type == CommandType.Registry && parts.Length >= 4)
+            {
+                target = $"{parts[0]}\\{parts[1]}";
+                value = $"{parts[2]}|{parts[3]}";
+            }
+            else if (command.Type == CommandType.Service && parts.Length >= 2)
+            {
+                target = $"Service:{parts[0]}";
+                value = parts[1];
+            }
+            if (target is null || value is null) continue;
+            if (!valuesByTarget.TryGetValue(target, out var values))
+                valuesByTarget[target] = values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            values.Add(value);
+        }
+        return valuesByTarget.Where(pair => pair.Value.Count > 1).Select(pair => pair.Key).ToList();
     }
 
     private async Task RefreshTweakStatesAsync() => await RefreshTweakStatesAsync(silent: false);

@@ -35,6 +35,25 @@ public class RegistryService
         key?.DeleteValue(valueName, throwOnMissingValue: false);
     }
 
+    public void RestoreValue(Models.RegistryBackupEntry entry)
+    {
+        if (!entry.Existed)
+        {
+            DeleteValue(entry.Path, entry.Name);
+            return;
+        }
+
+        object value = entry.Kind switch
+        {
+            RegistryValueKind.DWord => int.Parse(entry.Value ?? "0", System.Globalization.CultureInfo.InvariantCulture),
+            RegistryValueKind.QWord => long.Parse(entry.Value ?? "0", System.Globalization.CultureInfo.InvariantCulture),
+            RegistryValueKind.Binary => Convert.FromBase64String(entry.Value ?? string.Empty),
+            RegistryValueKind.MultiString => (entry.Value ?? string.Empty).Split('\n'),
+            _ => entry.Value ?? string.Empty
+        };
+        SetValue(entry.Path, entry.Name, value, entry.Kind);
+    }
+
     public void CreateKey(string keyPath)
     {
         var (hive, subKey) = ParsePath(keyPath);
