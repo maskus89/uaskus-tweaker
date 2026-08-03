@@ -19,6 +19,7 @@ public class MainViewModel : BaseViewModel
     private readonly RestorePointService _restorePoint = new();
     private readonly TweakStateDetector _stateDetector = new();
     private readonly TweakBackupService _backup = new();
+    private readonly AppliedTweaksStateService _appliedTweaksState = new();
 
     private TweakCategoryViewModel? _selectedCategory;
     private bool _isApplying;
@@ -181,6 +182,8 @@ public class MainViewModel : BaseViewModel
                     tweak.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SelectedTweakCount));
                 Categories.Add(cat);
             }
+
+            RestoreAppliedSelections();
             SelectedCategory = Categories.FirstOrDefault();
             AddLog("Tweaks loaded successfully.", LogLevel.Success);
         }
@@ -274,6 +277,7 @@ public class MainViewModel : BaseViewModel
             AddLog($"Applying {selected.Count} tweak(s)…", LogLevel.Info);
             bool anyRestart = false;
             int ok = 0, fail = 0;
+            var appliedIds = new List<string>();
 
             for (int i = 0; i < selected.Count; i++)
             {
@@ -295,7 +299,16 @@ public class MainViewModel : BaseViewModel
                 }
 
                 if (tweakOk) ok++; else fail++;
+                if (tweakOk) appliedIds.Add(tweak.Id);
                 if (tweak.RequiresRestart) anyRestart = true;
+            }
+
+            if (appliedIds.Count > 0)
+            {
+                var persistedIds = _appliedTweaksState.LoadAppliedTweakIds();
+                foreach (var appliedId in appliedIds)
+                    persistedIds.Add(appliedId);
+                _appliedTweaksState.SaveAppliedTweakIds(persistedIds);
             }
 
             AddLog($"Done. {ok} succeeded, {fail} failed.", fail > 0 ? LogLevel.Warning : LogLevel.Success);
@@ -456,5 +469,30 @@ public class MainViewModel : BaseViewModel
             while (LogEntries.Count > 1000)
                 LogEntries.RemoveAt(0);
         });
+    }
+
+    private void RestoreAppliedSelections()
+    {
+        var ids = _appliedTweaksState.LoadAppliedTweakIds();
+        if (ids.Count == 0)
+            return;
+
+        var restored = 0;
+        foreach (var tweak in Categories.SelectMany(c => c.Tweaks))
+        {
+            if (!ids.Contains(tweak.Id))
+                continue;
+
+            tweak.IsSelected = true;
+            restored++;
+        }
+
+        if (restored > 0)
+        {
+            foreach (var category in Categories)
+                category.NotifyCounts();
+            OnPropertyChanged(nameof(SelectedTweakCount));
+            AddLog($"Restored {restored} previously applied tweak selection(s).", LogLevel.Info);
+        }
     }
 }
