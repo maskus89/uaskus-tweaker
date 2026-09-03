@@ -26,15 +26,54 @@ public class MainViewModel : BaseViewModel
     private bool _createRestorePoint = true;
     private bool _isCheckingStates;
     private bool _hasUndoAvailable;
+    private SetupMode _activeSetupMode = SetupMode.FullAccess;
     private string _statusText = "Choose a category, then select the changes you want.";
 
     public ObservableCollection<TweakCategoryViewModel> Categories { get; } = new();
+    public ObservableCollection<TweakCategoryViewModel> VisibleCategories { get; } = new();
     public ObservableCollection<LogEntry> LogEntries { get; } = new();
     public SystemInfoViewModel SystemInfo { get; } = new();
 
     public bool IsAdmin { get; } = new WindowsPrincipal(WindowsIdentity.GetCurrent())
         .IsInRole(WindowsBuiltInRole.Administrator);
     public string DisplayVersion => $"v{UpdateService.CurrentVersion.ToString(3)}";
+
+    public SetupMode ActiveSetupMode
+    {
+        get => _activeSetupMode;
+        private set
+        {
+            if (!SetProperty(ref _activeSetupMode, value))
+                return;
+
+            OnPropertyChanged(nameof(IsFullAccessMode));
+            OnPropertyChanged(nameof(IsGamingMode));
+            OnPropertyChanged(nameof(IsPrivacyMode));
+            OnPropertyChanged(nameof(IsPerformanceMode));
+            OnPropertyChanged(nameof(IsExtremePerformanceMode));
+            OnPropertyChanged(nameof(ActiveSetupTitle));
+            OnPropertyChanged(nameof(ActiveSetupDescription));
+            OnPropertyChanged(nameof(CategoryCardWidth));
+        }
+    }
+
+    public bool IsFullAccessMode => ActiveSetupMode == SetupMode.FullAccess;
+    public bool IsGamingMode => ActiveSetupMode == SetupMode.Gaming;
+    public bool IsPrivacyMode => ActiveSetupMode == SetupMode.Privacy;
+    public bool IsPerformanceMode => ActiveSetupMode == SetupMode.Performance;
+    public bool IsExtremePerformanceMode => ActiveSetupMode == SetupMode.ExtremePerformance;
+    public double CategoryCardWidth => IsFullAccessMode ? 122 : 190;
+    public string ActiveSetupTitle => ActiveSetupMode switch
+    {
+        SetupMode.Gaming => "Gaming folders",
+        SetupMode.Privacy => "Privacy folders",
+        SetupMode.Performance => "Performance folders",
+        SetupMode.ExtremePerformance => "Extreme performance folders",
+        _ => "Full access — all folders"
+    };
+    public string ActiveSetupDescription => IsFullAccessMode
+        ? "Browse every category and build your own setup."
+        : "Only folders used by this Easy Setup preset are shown.";
 
     public TweakCategoryViewModel? SelectedCategory
     {
@@ -104,6 +143,7 @@ public class MainViewModel : BaseViewModel
     public ICommand PrivacyPresetCommand { get; }
     public ICommand MaxPerformanceCommand { get; }
     public ICommand ExtremePerformanceCommand { get; }
+    public ICommand FullAccessCommand { get; }
     public ICommand RefreshTweakStatesCommand { get; }
     public ICommand UndoLastApplyCommand { get; }
 
@@ -124,30 +164,32 @@ public class MainViewModel : BaseViewModel
         UndoLastApplyCommand = new AsyncRelayCommand(UndoLastApplyAsync, () => !IsApplying && HasUndoAvailable);
         HasUndoAvailable = _backup.HasBackup;
 
-        GamingPresetCommand = new RelayCommand(_ => ApplyPreset("Gaming Preset",
+        GamingPresetCommand = new RelayCommand(_ => ApplyPreset(SetupMode.Gaming, "Gaming Preset",
             "game_mode", "game_dvr_bar", "game_fso", "game_power",
             "perf_gpu_sched", "perf_cpu_priority",
             "game_xbox_svc", "essential_edge", "perf_cpu_100", "perf_responsiveness"));
 
-        PrivacyPresetCommand = new RelayCommand(_ => ApplyPreset("Privacy Preset",
+        PrivacyPresetCommand = new RelayCommand(_ => ApplyPreset(SetupMode.Privacy, "Privacy Preset",
             "essential_telemetry", "essential_activity", "essential_consumer",
             "priv_telemetry_svc", "priv_adid", "priv_cortana", "priv_feedback",
             "priv_websearch", "priv_tailored",
             "priv_diagdata", "priv_errorreporting"));
 
-        MaxPerformanceCommand = new RelayCommand(_ => ApplyPreset("Max Performance Preset",
+        MaxPerformanceCommand = new RelayCommand(_ => ApplyPreset(SetupMode.Performance, "Max Performance Preset",
             "perf_power_ultimate", "perf_core_parking", "perf_cpu_100",
             "perf_fast_startup", "perf_gpu_sched", "perf_animations",
             "perf_transparency", "perf_responsiveness", "perf_cpu_priority",
             "game_dvr_bar", "essential_edge"));
 
-        ExtremePerformanceCommand = new RelayCommand(_ => ApplyPreset("EXTREME Performance Preset",
+        ExtremePerformanceCommand = new RelayCommand(_ => ApplyPreset(SetupMode.ExtremePerformance, "EXTREME Performance Preset",
             "perf_power_ultimate", "perf_core_parking", "perf_cpu_throttle",
             "perf_cpu_100", "perf_fast_startup", "perf_gpu_sched",
             "perf_visual_effects", "perf_animations", "perf_transparency",
             "perf_superfetch", "perf_paging_exec", "perf_responsiveness",
             "perf_cpu_priority", "perf_winsearch",
             "ext_hpet", "ext_dynamictick", "ext_mmcss"));
+
+        FullAccessCommand = new RelayCommand(ShowFullAccess);
 
         // Now try to load tweaks
         try
@@ -170,6 +212,7 @@ public class MainViewModel : BaseViewModel
                     };
                 }
                 Categories.Add(cat);
+                VisibleCategories.Add(cat);
             }
 
             RestoreAppliedSelections();
@@ -195,7 +238,7 @@ public class MainViewModel : BaseViewModel
         _ = RefreshTweakStatesAsync();
     }
 
-    private void ApplyPreset(string presetName, params string[] tweakIds)
+    private void ApplyPreset(SetupMode setupMode, string presetName, params string[] tweakIds)
     {
         // Deselect all first
         foreach (var cat in Categories)
@@ -208,9 +251,36 @@ public class MainViewModel : BaseViewModel
                 if (ids.Contains(t.Id))
                     t.IsSelected = true;
 
-        AddLog($"Preset '{presetName}' applied — {tweakIds.Length} tweaks selected.", LogLevel.Info);
-        StatusText = $"{presetName} selected. Review the changes, then apply when ready.";
+        SetVisibleCategories(Categories.Where(category =>
+            category.Tweaks.Any(tweak => ids.Contains(tweak.Id))));
+        ActiveSetupMode = setupMode;
+        SelectedCategory = VisibleCategories.FirstOrDefault();
+
+        AddLog($"Preset '{presetName}' selected — {tweakIds.Length} changes ready for review. Nothing has been applied yet.", LogLevel.Info);
+        StatusText = $"{presetName} selected. Review it, then press Apply to make changes.";
         OnPropertyChanged(nameof(SelectedTweakCount));
+    }
+
+    private void ShowFullAccess()
+    {
+        var previousCategory = SelectedCategory;
+        SetVisibleCategories(Categories);
+        ActiveSetupMode = SetupMode.FullAccess;
+        SelectedCategory = previousCategory is not null && VisibleCategories.Contains(previousCategory)
+            ? previousCategory
+            : VisibleCategories.FirstOrDefault();
+
+        StatusText = SelectedTweakCount == 0
+            ? "Full Access opened. Browse every folder and choose your changes."
+            : $"Full Access opened. Your {SelectedTweakCount} selected changes were kept; press Apply when ready.";
+        AddLog("Full Access opened. Existing selections were kept.", LogLevel.Info);
+    }
+
+    private void SetVisibleCategories(IEnumerable<TweakCategoryViewModel> categories)
+    {
+        VisibleCategories.Clear();
+        foreach (var category in categories)
+            VisibleCategories.Add(category);
     }
 
     private async Task ApplyTweaksAsync()

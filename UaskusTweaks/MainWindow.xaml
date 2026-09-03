@@ -36,7 +36,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="Margin" Value="0,0,8,0"/>
-            <Setter Property="MinWidth" Value="122"/>
+            <Setter Property="Width" Value="{Binding DataContext.CategoryCardWidth, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
@@ -47,10 +47,30 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="7"
-                                Padding="{TemplateBinding Padding}">
+                                Padding="{TemplateBinding Padding}"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="CategoryScale" ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleX" To="1.025" Duration="0:0:0.12"/>
+                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleY" To="1.025" Duration="0:0:0.12"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.14"/>
+                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.14"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Card" Property="Background" Value="{StaticResource BrushBg3}"/>
                                 <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource BrushAccent}"/>
@@ -59,6 +79,13 @@
                                 <Setter TargetName="Card" Property="Background" Value="{StaticResource BrushAccent}"/>
                                 <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource BrushCyan}"/>
                                 <Setter Property="Foreground" Value="White"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Card" Storyboard.TargetProperty="Opacity" From="0.78" To="1" Duration="0:0:0.18"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -68,8 +95,14 @@
 
         <Style x:Key="PresetButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="12,9"/>
+            <Setter Property="Padding" Value="13,10"/>
             <Setter Property="Margin" Value="0,0,0,7"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource BrushAccentDark}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BrushCyan}"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="PrimaryApplyButton" TargetType="Button" BasedOn="{StaticResource AccentButton}">
@@ -116,9 +149,37 @@
 
         <DataTemplate x:Key="TweakRowTemplate" DataType="{x:Type vm:TweakViewModel}">
             <Border Margin="2,4" Padding="14,12" Background="{StaticResource BrushBg1}"
-                    BorderThickness="1" BorderBrush="{StaticResource BrushBg2}" CornerRadius="8">
+                    BorderThickness="1" BorderBrush="{StaticResource BrushBg2}" CornerRadius="8"
+                    ToolTipService.InitialShowDelay="250" ToolTipService.BetweenShowDelay="80"
+                    ToolTipService.ShowDuration="30000">
                 <Border.ToolTip>
-                    <ToolTip Content="{Binding Tooltip}"/>
+                    <ToolTip MaxWidth="470" Padding="16"
+                             DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                        <StackPanel Width="420">
+                            <TextBlock Text="{Binding Name}" Foreground="{StaticResource BrushTextPrimary}"
+                                       FontSize="17" FontWeight="Bold" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding Tooltip}" Foreground="{StaticResource BrushTextSecondary}"
+                                       FontSize="14" LineHeight="20" TextWrapping="Wrap" Margin="0,8,0,12"/>
+                            <WrapPanel>
+                                <Border Background="{Binding RiskColor}" CornerRadius="4" Padding="8,4" Margin="0,0,7,5">
+                                    <TextBlock Text="{Binding RiskText, StringFormat=Risk: {0}}" Foreground="#1e1e2e"
+                                               FontSize="11" FontWeight="Bold"/>
+                                </Border>
+                                <Border Background="{Binding StateColor}" CornerRadius="4" Padding="8,4" Margin="0,0,7,5">
+                                    <TextBlock Text="{Binding StateText, StringFormat=Current: {0}}" Foreground="White"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Background="#7f1d1d" CornerRadius="4" Padding="8,4" Margin="0,0,7,5"
+                                        Visibility="{Binding IsAdminRequired, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Administrator required" Foreground="#fca5a5" FontSize="11" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Background="#78350f" CornerRadius="4" Padding="8,4" Margin="0,0,7,5"
+                                        Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Restart required" Foreground="#fcd34d" FontSize="11" FontWeight="SemiBold"/>
+                                </Border>
+                            </WrapPanel>
+                        </StackPanel>
+                    </ToolTip>
                 </Border.ToolTip>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -131,18 +192,18 @@
                         <ToggleButton IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                       Style="{StaticResource ToggleSwitchStyle}"/>
                         <TextBlock Text="SELECT" Foreground="{StaticResource BrushTextMuted}"
-                                   FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                   FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="10,0,16,0" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding Name}" Foreground="{StaticResource BrushTextPrimary}"
-                                       FontWeight="SemiBold" FontSize="14"/>
+                                       FontWeight="SemiBold" FontSize="16"/>
                             <TextBlock Text="  Administrator access" Foreground="{StaticResource BrushWarning}"
                                        FontSize="10" VerticalAlignment="Center"
                                        Visibility="{Binding IsAdminRequired, Converter={StaticResource BoolToVis}}"/>
                         </StackPanel>
                         <TextBlock Text="{Binding Description}" Foreground="{StaticResource BrushTextSecondary}"
-                                   FontSize="11.5" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                   FontSize="13" LineHeight="18" TextWrapping="Wrap" Margin="0,4,0,0"/>
                         <TextBlock Text="Restart needed after applying" Foreground="{StaticResource BrushWarning}"
                                    FontSize="10" Margin="0,4,0,0"
                                    Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVis}}"/>
@@ -152,7 +213,7 @@
                                    FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                         <Border Background="{Binding StateColor}" CornerRadius="4" Padding="8,4" MinWidth="82">
                             <TextBlock Text="{Binding StateText}" Foreground="White" TextAlignment="Center"
-                                       FontSize="9" FontWeight="Bold"/>
+                                       FontSize="10.5" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
                     <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -160,7 +221,7 @@
                                    FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                         <Border Background="{Binding RiskColor}" CornerRadius="4" Padding="8,4" MinWidth="72">
                             <TextBlock Text="{Binding RiskText}" Foreground="#1e1e2e" TextAlignment="Center"
-                                       FontSize="9" FontWeight="Bold"/>
+                                       FontSize="10.5" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
                 </Grid>
@@ -236,13 +297,13 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center" Margin="2,0,14,0">
-                    <TextBlock Text="1. CHOOSE A CATEGORY" Foreground="{StaticResource BrushAccent}"
-                               FontSize="11" FontWeight="Bold"/>
-                    <TextBlock Text="Start with Essential Tweaks if you are unsure."
+                    <TextBlock Text="{Binding ActiveSetupTitle}" Foreground="{StaticResource BrushAccent}"
+                               FontSize="13" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding ActiveSetupDescription}"
                                Foreground="{StaticResource BrushTextSecondary}" FontSize="10.5"
                                TextWrapping="Wrap" Margin="0,4,0,0"/>
                 </StackPanel>
-                <ListBox Grid.Column="1" ItemsSource="{Binding Categories}"
+                <ListBox Grid.Column="1" ItemsSource="{Binding VisibleCategories}"
                          SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
                          Style="{StaticResource CategoryListStyle}"
                          ItemContainerStyle="{StaticResource CategoryItemStyle}">
@@ -251,8 +312,8 @@
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Icon}" FontSize="21" Margin="0,0,9,0" VerticalAlignment="Center"/>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" FontSize="10.5" FontWeight="SemiBold"/>
-                                    <TextBlock FontSize="9" Opacity="0.78" Margin="0,2,0,0">
+                                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="10.5" Opacity="0.82" Margin="0,3,0,0">
                                         <Run Text="{Binding SelectedCount, Mode=OneWay}"/>
                                         <Run Text=" selected"/>
                                     </TextBlock>
@@ -275,31 +336,42 @@
                     <StackPanel>
                         <TextBlock Text="EASY SETUP" Foreground="{StaticResource BrushAccent}"
                                    FontSize="11" FontWeight="Bold"/>
-                        <TextBlock Text="Choose one ready-made setup, or select changes yourself on the right."
+                        <TextBlock Text="A setup selects recommendations and opens only its folders. Nothing changes until you press Apply."
                                    Foreground="{StaticResource BrushTextSecondary}" FontSize="10.5"
                                    TextWrapping="Wrap" Margin="0,4,0,10"/>
-                        <Button Command="{Binding GamingPresetCommand}" Style="{StaticResource PresetButton}">
+                        <Button Command="{Binding FullAccessCommand}" Style="{StaticResource PresetButton}"
+                                Tag="{Binding IsFullAccessMode}">
                             <StackPanel>
-                                <TextBlock Text="🎮 Gaming" FontWeight="SemiBold"/>
-                                <TextBlock Text="Smoother games and lower delay" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                                <TextBlock Text="📂 Full Access" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="Show every tweak folder" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding PrivacyPresetCommand}" Style="{StaticResource PresetButton}">
+                        <Button Command="{Binding GamingPresetCommand}" Style="{StaticResource PresetButton}"
+                                Tag="{Binding IsGamingMode}">
                             <StackPanel>
-                                <TextBlock Text="🛡 Privacy" FontWeight="SemiBold"/>
-                                <TextBlock Text="Reduce tracking and diagnostics" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                                <TextBlock Text="🎮 Gaming" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="Smoother games and lower delay" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding MaxPerformanceCommand}" Style="{StaticResource PresetButton}">
+                        <Button Command="{Binding PrivacyPresetCommand}" Style="{StaticResource PresetButton}"
+                                Tag="{Binding IsPrivacyMode}">
                             <StackPanel>
-                                <TextBlock Text="⚡ Performance" FontWeight="SemiBold"/>
-                                <TextBlock Text="Make Windows feel faster" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                                <TextBlock Text="🛡 Privacy" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="Reduce tracking and diagnostics" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding ExtremePerformanceCommand}" Style="{StaticResource PresetButton}">
+                        <Button Command="{Binding MaxPerformanceCommand}" Style="{StaticResource PresetButton}"
+                                Tag="{Binding IsPerformanceMode}">
                             <StackPanel>
-                                <TextBlock Text="⚠ Extreme performance" FontWeight="SemiBold" Foreground="{StaticResource BrushWarning}"/>
-                                <TextBlock Text="Experts only; includes risky changes" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                                <TextBlock Text="⚡ Performance" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="Make Windows feel faster" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ExtremePerformanceCommand}" Style="{StaticResource PresetButton}"
+                                Tag="{Binding IsExtremePerformanceMode}">
+                            <StackPanel>
+                                <TextBlock Text="⚠ Extreme performance" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource BrushWarning}"/>
+                                <TextBlock Text="Experts only; includes risky changes" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
                         <Separator Margin="0,5,0,10"/>
@@ -334,14 +406,14 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Foreground="{StaticResource BrushTextPrimary}">
-                                <Run Text="2. CHOOSE CHANGES  ·  " Foreground="{StaticResource BrushAccent}" FontWeight="Bold" FontSize="11"/>
+                                <Run Text="CHOOSE CHANGES  ·  " Foreground="{StaticResource BrushAccent}" FontWeight="Bold" FontSize="12"/>
                                 <Run Text="{Binding SelectedCategory.Icon}" FontSize="16"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedCategory.Name}" FontWeight="SemiBold" FontSize="14"/>
+                                <Run Text="{Binding SelectedCategory.Name}" FontWeight="SemiBold" FontSize="16"/>
                             </TextBlock>
                             <TextBlock Text="{Binding SelectedCategory.Description}" Foreground="{StaticResource BrushTextSecondary}"
                                        FontSize="10.5" Margin="0,3,0,0"/>
-                            <TextBlock Text="Turn on SELECT for the changes you want. Green ‘Already on’ means Windows already uses that setting."
+                            <TextBlock Text="Hover over a tweak for a full explanation. Turn on SELECT, review it, then press Apply."
                                        Foreground="{StaticResource BrushTextMuted}" FontSize="10" Margin="0,3,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">

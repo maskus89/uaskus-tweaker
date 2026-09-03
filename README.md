@@ -82,8 +82,8 @@ The finished executable will be at `publish\UaskusTweaks.exe`.
 Push a version tag to trigger the release workflow automatically:
 
 ```bash
-git tag v2.2.1
-git push origin v2.2.1
+git tag v2.3.0
+git push origin v2.3.0
 ```
 
 The workflow builds `UaskusTweaks.exe` with the tag version and attaches that executable to the GitHub Release. The tag must use a numeric version such as `v2.2.0` so installed apps can compare versions correctly.

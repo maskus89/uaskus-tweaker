@@ -4,7 +4,7 @@ Welcome to the releases page for Uaskus Tweaker!
 
 ## Next Release
 
-**Version 2.2** — Beginner-friendly UI and automatic updates
+**Version 2.3** — Focused Easy Setup folders, clearer explanations, and smoother controls
 
 Download the executable from the GitHub Releases page:  
 👉 **[Download UaskusTweaks.exe](https://github.com/maskus89/uaskus-tweaker/releases/latest/download/UaskusTweaks.exe)**
@@ -19,6 +19,13 @@ All releases with attached binaries are available on the
 [GitHub Releases page](https://github.com/maskus89/uaskus-tweaker/releases).
 
 ## Changelog
+
+### v2.3.0
+- Easy Setup modes now show only the folders used by the selected preset
+- Added Full Access to restore every tweak folder without losing selections
+- Added larger, detailed hover explanations for every tweak
+- Increased important text sizes and added subtle button, folder, and toggle animations
+- Presets only prepare selections; changes still require pressing Apply
 
 ### v2.2.1
 - Fixed the startup crash caused by a two-way WPF binding to a read-only property

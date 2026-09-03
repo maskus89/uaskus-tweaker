@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Principal;
 using System.Windows;
 using System.Windows.Input;
+using UaskusTweaks.Models;
 using UaskusTweaks.Services;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
@@ -98,6 +99,7 @@ public partial class App : Application
 
             if (isSmokeTest)
             {
+                RunSetupModeSmokeTests(mainWindow);
                 Log("Startup smoke test passed.");
                 mainWindow.Close();
                 Shutdown(0);
@@ -116,6 +118,45 @@ public partial class App : Application
         }
 
         base.OnStartup(e);
+    }
+
+    private static void RunSetupModeSmokeTests(MainWindow window)
+    {
+        if (window.DataContext is not ViewModels.MainViewModel viewModel)
+            throw new InvalidOperationException("The main view model was not attached.");
+
+        Validate(viewModel.GamingPresetCommand, SetupMode.Gaming, 10,
+            "Essential Tweaks", "Ultimate Performance", "Gaming Tweaks");
+        Validate(viewModel.PrivacyPresetCommand, SetupMode.Privacy, 11,
+            "Essential Tweaks", "Privacy Tweaks");
+        Validate(viewModel.MaxPerformanceCommand, SetupMode.Performance, 11,
+            "Essential Tweaks", "Ultimate Performance", "Gaming Tweaks");
+        Validate(viewModel.ExtremePerformanceCommand, SetupMode.ExtremePerformance, 17,
+            "Ultimate Performance", "EXTREME Performance");
+
+        viewModel.FullAccessCommand.Execute(null);
+        window.UpdateLayout();
+        if (viewModel.ActiveSetupMode != SetupMode.FullAccess ||
+            viewModel.VisibleCategories.Count != viewModel.Categories.Count ||
+            viewModel.SelectedTweakCount != 17)
+        {
+            throw new InvalidOperationException("Full Access did not restore all folders while preserving selections.");
+        }
+
+        void Validate(ICommand command, SetupMode expectedMode, int expectedSelections,
+            params string[] expectedCategories)
+        {
+            command.Execute(null);
+            window.UpdateLayout();
+
+            var actualCategories = viewModel.VisibleCategories.Select(category => category.Name).ToArray();
+            if (viewModel.ActiveSetupMode != expectedMode ||
+                viewModel.SelectedTweakCount != expectedSelections ||
+                !actualCategories.SequenceEqual(expectedCategories))
+            {
+                throw new InvalidOperationException($"The {expectedMode} Easy Setup view is not configured correctly.");
+            }
+        }
     }
 
     private async Task CheckForUpdatesAsync(MainWindow owner, Action<string> log)
