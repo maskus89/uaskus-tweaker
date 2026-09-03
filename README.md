@@ -43,9 +43,9 @@ Every push to `main` also produces a build artifact:
 1. Download `UaskusTweaks.zip` from the [Releases page](https://github.com/maskus89/uaskus-tweaker/releases/latest)
 2. Extract `UaskusTweaks.exe`
 3. Right-click → **Run as administrator**
-4. Browse categories on the left or use a preset button
-5. Check the tweaks you want to apply
-6. Click **Apply Selected** (a restore point is created automatically)
+4. Choose a category across the top, or use an Easy Setup preset on the left
+5. Turn on **SELECT** for the changes you want
+6. Click the large **Apply selected changes** button (a restore point is created automatically)
 
 ## Build Locally
 

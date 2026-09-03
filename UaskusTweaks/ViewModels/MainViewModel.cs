@@ -26,8 +26,7 @@ public class MainViewModel : BaseViewModel
     private bool _createRestorePoint = true;
     private bool _isCheckingStates;
     private bool _hasUndoAvailable;
-    private string _searchText = string.Empty;
-    private string _statusText = "Ready";
+    private string _statusText = "Choose a category, then select the changes you want.";
 
     public ObservableCollection<TweakCategoryViewModel> Categories { get; } = new();
     public ObservableCollection<LogEntry> LogEntries { get; } = new();
@@ -42,7 +41,7 @@ public class MainViewModel : BaseViewModel
         set
         {
             SetProperty(ref _selectedCategory, value);
-            OnPropertyChanged(nameof(FilteredTweaks));
+            OnPropertyChanged(nameof(CurrentTweaks));
         }
     }
 
@@ -53,10 +52,11 @@ public class MainViewModel : BaseViewModel
         {
             SetProperty(ref _isApplying, value);
             OnPropertyChanged(nameof(CanApply));
+            OnPropertyChanged(nameof(ApplyButtonText));
         }
     }
 
-    public bool CanApply => !_isApplying;
+    public bool CanApply => !_isApplying && SelectedTweakCount > 0;
 
     public bool HasUndoAvailable
     {
@@ -76,40 +76,21 @@ public class MainViewModel : BaseViewModel
         set => SetProperty(ref _createRestorePoint, value);
     }
 
-    public string SearchText
-    {
-        get => _searchText;
-        set
-        {
-            SetProperty(ref _searchText, value);
-            OnPropertyChanged(nameof(FilteredTweaks));
-        }
-    }
-
     public string StatusText
     {
         get => _statusText;
         private set => SetProperty(ref _statusText, value);
     }
 
-    public IEnumerable<TweakViewModel> FilteredTweaks
-    {
-        get
-        {
-            if (SelectedCategory == null) return Enumerable.Empty<TweakViewModel>();
-            var query = SelectedCategory.Tweaks.AsEnumerable();
-            if (!string.IsNullOrWhiteSpace(_searchText))
-            {
-                var lower = _searchText.ToLowerInvariant();
-                query = query.Where(t =>
-                    t.Name.Contains(lower, StringComparison.OrdinalIgnoreCase) ||
-                    t.Description.Contains(lower, StringComparison.OrdinalIgnoreCase));
-            }
-            return query;
-        }
-    }
+    public IEnumerable<TweakViewModel> CurrentTweaks =>
+        SelectedCategory?.Tweaks ?? Enumerable.Empty<TweakViewModel>();
 
     public int SelectedTweakCount => Categories.SelectMany(c => c.Tweaks).Count(t => t.IsSelected);
+    public string ApplyButtonText => IsApplying
+        ? "Applying changes…"
+        : SelectedTweakCount == 0
+            ? "Select changes to continue"
+            : $"Apply {SelectedTweakCount} selected change{(SelectedTweakCount == 1 ? "" : "s")}";
 
     // Commands
     public ICommand ApplySelectedCommand { get; }
@@ -120,7 +101,6 @@ public class MainViewModel : BaseViewModel
     public ICommand PrivacyPresetCommand { get; }
     public ICommand MaxPerformanceCommand { get; }
     public ICommand ExtremePerformanceCommand { get; }
-    public ICommand SelectCategoryCommand { get; }
     public ICommand RefreshTweakStatesCommand { get; }
     public ICommand UndoLastApplyCommand { get; }
 
@@ -166,12 +146,6 @@ public class MainViewModel : BaseViewModel
             "perf_cpu_priority", "perf_winsearch",
             "ext_hpet", "ext_dynamictick", "ext_mmcss"));
 
-        SelectCategoryCommand = new RelayCommand(param =>
-        {
-            if (param is TweakCategoryViewModel cat)
-                SelectedCategory = cat;
-        });
-
         // Now try to load tweaks
         try
         {
@@ -179,7 +153,19 @@ public class MainViewModel : BaseViewModel
             foreach (var cat in categories)
             {
                 foreach (var tweak in cat.Tweaks)
-                    tweak.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SelectedTweakCount));
+                {
+                    tweak.PropertyChanged += (_, args) =>
+                    {
+                        if (args.PropertyName != nameof(TweakViewModel.IsSelected))
+                            return;
+
+                        cat.NotifyCounts();
+                        OnPropertyChanged(nameof(SelectedTweakCount));
+                        OnPropertyChanged(nameof(CanApply));
+                        OnPropertyChanged(nameof(ApplyButtonText));
+                        CommandManager.InvalidateRequerySuggested();
+                    };
+                }
                 Categories.Add(cat);
             }
 
@@ -220,6 +206,7 @@ public class MainViewModel : BaseViewModel
                     t.IsSelected = true;
 
         AddLog($"Preset '{presetName}' applied — {tweakIds.Length} tweaks selected.", LogLevel.Info);
+        StatusText = $"{presetName} selected. Review the changes, then apply when ready.";
         OnPropertyChanged(nameof(SelectedTweakCount));
     }
 
@@ -424,7 +411,9 @@ public class MainViewModel : BaseViewModel
         var selected = Categories.SelectMany(c => c.Tweaks).Where(t => t.IsSelected).ToList();
         if (selected.Count == 0)
         {
-            MessageBox.Show("No tweaks selected.", "Preview", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(
+                "Nothing is selected yet.\n\nChoose a category, then turn on SELECT for the changes you want.",
+                "Review selected changes", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -437,7 +426,7 @@ public class MainViewModel : BaseViewModel
             if (t.RequiresRestart) sb.AppendLine("  ⚠ Requires restart");
             sb.AppendLine();
         }
-        MessageBox.Show(sb.ToString(), "Preview – Selected Tweaks", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(sb.ToString(), "Review selected changes", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void ExportLog()

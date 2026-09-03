@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:UaskusTweaks.ViewModels"
         xmlns:models="clr-namespace:UaskusTweaks.Models"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Uaskus Tweaks v2.1"
         Width="1220" Height="820"
         MinWidth="920" MinHeight="620"
@@ -15,27 +14,83 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <!-- Log level → foreground brush -->
-        <sys:String x:Key="InfoColor">#60a5fa</sys:String>
-        <sys:String x:Key="SuccessColor">#22c55e</sys:String>
-        <sys:String x:Key="WarningColor">#f59e0b</sys:String>
-        <sys:String x:Key="ErrorColor">#ef4444</sys:String>
+
+        <Style x:Key="CategoryListStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CategoryItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="{StaticResource BrushBg2}"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushTextSecondary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BrushBg3}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="MinWidth" Value="122"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Card"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Card" Property="Background" Value="{StaticResource BrushBg3}"/>
+                                <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource BrushAccent}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Card" Property="Background" Value="{StaticResource BrushAccent}"/>
+                                <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource BrushCyan}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PresetButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="12,9"/>
+            <Setter Property="Margin" Value="0,0,0,7"/>
+        </Style>
+
+        <Style x:Key="PrimaryApplyButton" TargetType="Button" BasedOn="{StaticResource AccentButton}">
+            <Setter Property="MinWidth" Value="280"/>
+            <Setter Property="Height" Value="52"/>
+            <Setter Property="Padding" Value="22,10"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
 
         <DataTemplate x:Key="LogEntryTemplate" DataType="{x:Type models:LogEntry}">
             <Grid Margin="0,1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="145"/>
-                    <ColumnDefinition Width="55"/>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition Width="58"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0"
-                           Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss}}"
-                           Foreground="{StaticResource BrushTextMuted}"
-                           FontSize="11" FontFamily="Consolas"/>
-                <TextBlock Grid.Column="1"
-                           Text="{Binding LogLevel}"
-                           FontSize="11" FontFamily="Consolas"
-                           FontWeight="SemiBold">
+                <TextBlock Grid.Column="0" Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss}}"
+                           Foreground="{StaticResource BrushTextMuted}" FontSize="11" FontFamily="Consolas"/>
+                <TextBlock Grid.Column="1" Text="{Binding LogLevel}" FontSize="11"
+                           FontFamily="Consolas" FontWeight="SemiBold">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="{StaticResource BrushInfo}"/>
@@ -53,107 +108,61 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBlock Grid.Column="2"
-                           Text="{Binding Message}"
-                           Foreground="{StaticResource BrushTextPrimary}"
-                           FontSize="11" FontFamily="Consolas"
-                           TextWrapping="Wrap"/>
+                <TextBlock Grid.Column="2" Text="{Binding Message}"
+                           Foreground="{StaticResource BrushTextPrimary}" FontSize="11"
+                           FontFamily="Consolas" TextWrapping="Wrap"/>
             </Grid>
         </DataTemplate>
 
-        <!-- Tweak row template -->
         <DataTemplate x:Key="TweakRowTemplate" DataType="{x:Type vm:TweakViewModel}">
-            <Border Margin="2,3"
-                    Padding="12,9"
-                    Background="{StaticResource BrushBg1}"
-                    BorderThickness="1"
-                    BorderBrush="{StaticResource BrushBg2}"
-                    CornerRadius="7">
+            <Border Margin="2,4" Padding="14,12" Background="{StaticResource BrushBg1}"
+                    BorderThickness="1" BorderBrush="{StaticResource BrushBg2}" CornerRadius="8">
                 <Border.ToolTip>
                     <ToolTip Content="{Binding Tooltip}"/>
                 </Border.ToolTip>
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="62"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="68"/>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="112"/>
+                        <ColumnDefinition Width="98"/>
                     </Grid.ColumnDefinitions>
-
-                    <!-- Toggle switch -->
-                    <ToggleButton Grid.Column="0"
-                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                  Style="{StaticResource ToggleSwitchStyle}"
-                                  VerticalAlignment="Center"/>
-
-                    <!-- Name + Description -->
-                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Name}"
-                                       Foreground="{StaticResource BrushTextPrimary}"
-                                       FontWeight="SemiBold" FontSize="13.5"/>
-                            <TextBlock Text=" 🔒"
-                                       Foreground="{StaticResource BrushWarning}"
-                                       FontSize="11" VerticalAlignment="Center"
-                                       Visibility="{Binding IsAdminRequired, Converter={StaticResource BoolToVis}}"/>
-                            <TextBlock Text=" ↺"
-                                       Foreground="{StaticResource BrushWarning}"
-                                       FontSize="11" VerticalAlignment="Center"
-                                       Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVis}}"/>
-                        </StackPanel>
-                        <TextBlock Text="{Binding Description}"
-                                   Foreground="{StaticResource BrushTextSecondary}"
-                                   FontSize="11.5"
-                                   TextWrapping="NoWrap"
-                                   TextTrimming="CharacterEllipsis"/>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <ToggleButton IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Style="{StaticResource ToggleSwitchStyle}"/>
+                        <TextBlock Text="SELECT" Foreground="{StaticResource BrushTextMuted}"
+                                   FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
-
-                    <!-- Current-state badge -->
-                    <Border Grid.Column="2"
-                            Background="{Binding StateColor}"
-                            CornerRadius="3"
-                            Padding="4,2"
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding StateText}"
-                                   Foreground="White"
-                                   FontSize="9"
-                                   FontWeight="Bold"/>
-                    </Border>
-
-                    <!-- Risk badge -->
-                    <Border Grid.Column="3"
-                            Background="{Binding RiskColor}"
-                            CornerRadius="3"
-                            Padding="4,2"
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding RiskText}"
-                                   Foreground="#1e1e2e"
-                                   FontSize="9"
-                                   FontWeight="Bold"/>
-                    </Border>
-
-                    <!-- Restart icon -->
-                    <TextBlock Grid.Column="4"
-                               Text="↺"
-                               Foreground="{StaticResource BrushWarning}"
-                               FontSize="14"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Center"
-                               ToolTip="Requires restart">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding RequiresRestart}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                    <StackPanel Grid.Column="1" Margin="10,0,16,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}" Foreground="{StaticResource BrushTextPrimary}"
+                                       FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Text="  Administrator access" Foreground="{StaticResource BrushWarning}"
+                                       FontSize="10" VerticalAlignment="Center"
+                                       Visibility="{Binding IsAdminRequired, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Description}" Foreground="{StaticResource BrushTextSecondary}"
+                                   FontSize="11.5" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                        <TextBlock Text="Restart needed after applying" Foreground="{StaticResource BrushWarning}"
+                                   FontSize="10" Margin="0,4,0,0"
+                                   Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="CURRENTLY" Foreground="{StaticResource BrushTextMuted}"
+                                   FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                        <Border Background="{Binding StateColor}" CornerRadius="4" Padding="8,4" MinWidth="82">
+                            <TextBlock Text="{Binding StateText}" Foreground="White" TextAlignment="Center"
+                                       FontSize="9" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="RISK" Foreground="{StaticResource BrushTextMuted}"
+                                   FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                        <Border Background="{Binding RiskColor}" CornerRadius="4" Padding="8,4" MinWidth="72">
+                            <TextBlock Text="{Binding RiskText}" Foreground="#1e1e2e" TextAlignment="Center"
+                                       FontSize="9" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -161,38 +170,27 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="48"/>   <!-- Title bar -->
-            <RowDefinition Height="*"/>    <!-- Main content -->
-            <RowDefinition Height="180"/>  <!-- Log panel -->
-            <RowDefinition Height="38"/>   <!-- Status bar -->
+            <RowDefinition Height="48"/>
+            <RowDefinition Height="104"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="128"/>
+            <RowDefinition Height="72"/>
         </Grid.RowDefinitions>
 
-        <!-- ══════════════════════════════════════════════════════════════════
-             TITLE BAR
-        ══════════════════════════════════════════════════════════════════════ -->
-        <Border Grid.Row="0"
-                Background="{StaticResource BrushBg0}"
-                BorderBrush="{StaticResource BrushBg2}"
-                BorderThickness="0,0,0,1"
-                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+        <Border Grid.Row="0" Background="{StaticResource BrushBg0}" BorderBrush="{StaticResource BrushBg2}"
+                BorderThickness="0,0,0,1" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid Margin="14,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="⚡" FontSize="18" Foreground="{StaticResource BrushCyan}" Margin="0,0,8,0"/>
-                    <TextBlock Text="UASKUS TWEAKS"
-                               FontSize="16" FontWeight="Bold"
-                               Foreground="{StaticResource BrushTextPrimary}"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text=" v2.1"
-                               FontSize="11"
-                               Foreground="{StaticResource BrushTextMuted}"
+                    <TextBlock Text="UASKUS TWEAKS" FontSize="16" FontWeight="Bold"
+                               Foreground="{StaticResource BrushTextPrimary}" VerticalAlignment="Center"/>
+                    <TextBlock Text=" v2.1" FontSize="11" Foreground="{StaticResource BrushTextMuted}"
                                VerticalAlignment="Center" Margin="2,2,0,0"/>
-                    <!-- Admin badge -->
-                    <Border Margin="16,0,0,0" Padding="6,2" CornerRadius="3" VerticalAlignment="Center">
+                    <Border Margin="16,0,0,0" Padding="7,3" CornerRadius="3" VerticalAlignment="Center">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Background" Value="#14532d"/>
@@ -206,11 +204,11 @@
                         <TextBlock VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="🛡 ADMIN"/>
+                                    <Setter Property="Text" Value="✓ Ready to make changes"/>
                                     <Setter Property="Foreground" Value="{StaticResource BrushRiskLow}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsAdmin}" Value="False">
-                                            <Setter Property="Text" Value="⚠ NO ADMIN"/>
+                                            <Setter Property="Text" Value="⚠ Restart as administrator"/>
                                             <Setter Property="Foreground" Value="{StaticResource BrushError}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -218,267 +216,186 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Border>
-
                 </StackPanel>
-
-                <!-- Window buttons -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="─" Width="40" Height="30" FontSize="14"
-                            Background="Transparent" BorderThickness="0"
-                            Foreground="{StaticResource BrushTextSecondary}"
-                            Click="MinimizeButton_Click"/>
-                    <Button Content="□" Width="40" Height="30" FontSize="14"
-                            Background="Transparent" BorderThickness="0"
-                            Foreground="{StaticResource BrushTextSecondary}"
-                            Click="MaximizeButton_Click"/>
-                    <Button Content="✕" Width="40" Height="30" FontSize="14"
-                            Background="Transparent" BorderThickness="0"
-                            Foreground="{StaticResource BrushTextSecondary}"
-                            Click="CloseButton_Click"/>
+                    <Button Content="─" Width="40" Height="30" FontSize="14" Background="Transparent"
+                            BorderThickness="0" Foreground="{StaticResource BrushTextSecondary}" Click="MinimizeButton_Click"/>
+                    <Button Content="□" Width="40" Height="30" FontSize="14" Background="Transparent"
+                            BorderThickness="0" Foreground="{StaticResource BrushTextSecondary}" Click="MaximizeButton_Click"/>
+                    <Button Content="✕" Width="40" Height="30" FontSize="14" Background="Transparent"
+                            BorderThickness="0" Foreground="{StaticResource BrushTextSecondary}" Click="CloseButton_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ══════════════════════════════════════════════════════════════════
-             MAIN CONTENT
-        ══════════════════════════════════════════════════════════════════════ -->
-        <Grid Grid.Row="1">
+        <Border Grid.Row="1" Background="{StaticResource BrushBg1}" BorderBrush="{StaticResource BrushBg2}"
+                BorderThickness="0,0,0,1" Padding="14,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Margin="2,0,14,0">
+                    <TextBlock Text="1. CHOOSE A CATEGORY" Foreground="{StaticResource BrushAccent}"
+                               FontSize="11" FontWeight="Bold"/>
+                    <TextBlock Text="Start with Essential Tweaks if you are unsure."
+                               Foreground="{StaticResource BrushTextSecondary}" FontSize="10.5"
+                               TextWrapping="Wrap" Margin="0,4,0,0"/>
+                </StackPanel>
+                <ListBox Grid.Column="1" ItemsSource="{Binding Categories}"
+                         SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                         Style="{StaticResource CategoryListStyle}"
+                         ItemContainerStyle="{StaticResource CategoryItemStyle}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:TweakCategoryViewModel}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Icon}" FontSize="21" Margin="0,0,9,0" VerticalAlignment="Center"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontSize="10.5" FontWeight="SemiBold"/>
+                                    <TextBlock FontSize="9" Opacity="0.78" Margin="0,2,0,0">
+                                        <Run Text="{Binding SelectedCount}"/>
+                                        <Run Text=" selected"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220"/>      <!-- Left sidebar with tabs -->
-                <ColumnDefinition Width="*"/>        <!-- Main content area -->
+                <ColumnDefinition Width="258"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
-            <!-- LEFT SIDEBAR - Category Buttons -->
-            <Border Grid.Column="0"
-                    Background="{StaticResource BrushBg1}"
-                    BorderBrush="{StaticResource BrushBg2}"
-                    BorderThickness="0,0,1,0">
-                <DockPanel>
-                    <!-- Search bar -->
-                    <Border DockPanel.Dock="Top"
-                            Background="{StaticResource BrushBg0}"
-                            Padding="12,8"
-                            BorderBrush="{StaticResource BrushBg2}"
-                            BorderThickness="0,0,0,1">
-                        <Grid>
-                            <TextBox x:Name="SearchBox"
-                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="{StaticResource BrushBg2}"
-                                     Foreground="{StaticResource BrushTextPrimary}"
-                                     BorderBrush="{StaticResource BrushBg3}"
-                                     Padding="10,5"
-                                     FontSize="11"
-                                     VerticalAlignment="Center"/>
-                            <TextBlock Text="🔍 Search…"
-                                       Foreground="{StaticResource BrushTextMuted}"
-                                       FontSize="11"
-                                       Margin="12,0,0,0"
-                                       VerticalAlignment="Center"
-                                       IsHitTestVisible="False">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SearchText}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-                    </Border>
-
-                    <!-- Quick presets -->
-                    <Border DockPanel.Dock="Top"
-                            Margin="10,8,10,6"
-                            Padding="9"
-                            Background="{StaticResource BrushBg0}"
-                            BorderBrush="{StaticResource BrushBg2}"
-                            BorderThickness="1"
-                            CornerRadius="7">
-                        <StackPanel>
-                            <TextBlock Text="QUICK START"
-                                       Foreground="{StaticResource BrushTextMuted}"
-                                       FontSize="9" FontWeight="Bold" Margin="1,0,0,6"/>
-                            <UniformGrid Columns="2">
-                                <Button Content="Gaming" Command="{Binding GamingPresetCommand}" Style="{StaticResource SmallButton}" Margin="0,0,4,4"/>
-                                <Button Content="Privacy" Command="{Binding PrivacyPresetCommand}" Style="{StaticResource SmallButton}" Margin="0,0,0,4"/>
-                                <Button Content="Performance" Command="{Binding MaxPerformanceCommand}" Style="{StaticResource SmallButton}" Margin="0,0,4,0"/>
-                                <Button Content="Extreme" Command="{Binding ExtremePerformanceCommand}" Style="{StaticResource SmallButton}"/>
-                            </UniformGrid>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Category buttons list -->
-                    <ScrollViewer DockPanel.Dock="Bottom"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
-                        <ItemsControl x:Name="CategoryButtonsItemsControl" ItemsSource="{Binding Categories}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:TweakCategoryViewModel}">
-                                    <Button Click="CategoryButton_Click"
-                                            Tag="{Binding}"
-                                            Padding="8,6"
-                                            Margin="5,3"
-                                            Height="75"
-                                            Cursor="Hand">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="Background" Value="{StaticResource BrushBg2}"/>
-                                                <Setter Property="BorderBrush" Value="{StaticResource BrushBg3}"/>
-                                                <Setter Property="BorderThickness" Value="1"/>
-                                                <Setter Property="Foreground" Value="{StaticResource BrushTextSecondary}"/>
-                                                <EventSetter Event="MouseEnter" Handler="CategoryButton_MouseEnter"/>
-                                                <EventSetter Event="MouseLeave" Handler="CategoryButton_MouseLeave"/>
-                                            </Style>
-                                        </Button.Style>
-                                        <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            <TextBlock Text="{Binding Icon}" FontSize="22" TextAlignment="Center" Margin="0,0,0,2"/>
-                                            <TextBlock Text="{Binding Name}" FontSize="10" TextAlignment="Center" TextWrapping="Wrap" FontWeight="SemiBold"/>
-                                            <TextBlock FontSize="8" TextAlignment="Center" Margin="0,2,0,0" Opacity="0.7">
-                                                <Run Text="{Binding SelectedCount, Mode=OneWay}"/>
-                                                <Run Text="/"/>
-                                                <Run Text="{Binding TotalCount, Mode=OneWay}"/>
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </DockPanel>
+            <Border Grid.Column="0" Background="{StaticResource BrushBg1}" BorderBrush="{StaticResource BrushBg2}"
+                    BorderThickness="0,0,1,0" Padding="14,12">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <TextBlock Text="EASY SETUP" Foreground="{StaticResource BrushAccent}"
+                                   FontSize="11" FontWeight="Bold"/>
+                        <TextBlock Text="Choose one ready-made setup, or select changes yourself on the right."
+                                   Foreground="{StaticResource BrushTextSecondary}" FontSize="10.5"
+                                   TextWrapping="Wrap" Margin="0,4,0,10"/>
+                        <Button Command="{Binding GamingPresetCommand}" Style="{StaticResource PresetButton}">
+                            <StackPanel>
+                                <TextBlock Text="🎮 Gaming" FontWeight="SemiBold"/>
+                                <TextBlock Text="Smoother games and lower delay" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding PrivacyPresetCommand}" Style="{StaticResource PresetButton}">
+                            <StackPanel>
+                                <TextBlock Text="🛡 Privacy" FontWeight="SemiBold"/>
+                                <TextBlock Text="Reduce tracking and diagnostics" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding MaxPerformanceCommand}" Style="{StaticResource PresetButton}">
+                            <StackPanel>
+                                <TextBlock Text="⚡ Performance" FontWeight="SemiBold"/>
+                                <TextBlock Text="Make Windows feel faster" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ExtremePerformanceCommand}" Style="{StaticResource PresetButton}">
+                            <StackPanel>
+                                <TextBlock Text="⚠ Extreme performance" FontWeight="SemiBold" Foreground="{StaticResource BrushWarning}"/>
+                                <TextBlock Text="Experts only; includes risky changes" Foreground="{StaticResource BrushTextSecondary}" FontSize="10" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Separator Margin="0,5,0,10"/>
+                        <TextBlock Text="SAFETY" Foreground="{StaticResource BrushTextMuted}"
+                                   FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <CheckBox IsChecked="{Binding CreateRestorePoint}" Content="Create a restore point first" FontSize="11"/>
+                        <TextBlock Text="Recommended. This gives Windows a recovery point before changes are made."
+                                   Foreground="{StaticResource BrushTextMuted}" FontSize="9.5"
+                                   TextWrapping="Wrap" Margin="22,4,0,10"/>
+                        <Button Content="↶ Undo the last apply" Command="{Binding UndoLastApplyCommand}"
+                                Style="{StaticResource SmallButton}" HorizontalContentAlignment="Left"/>
+                        <Separator Margin="0,10"/>
+                        <TextBlock Text="TOOLS" Foreground="{StaticResource BrushTextMuted}"
+                                   FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <Button Content="Review selected changes" Command="{Binding PreviewCommand}"
+                                Style="{StaticResource SmallButton}" HorizontalContentAlignment="Left" Margin="0,0,0,6"/>
+                        <Button Content="Check what is already active" Command="{Binding RefreshTweakStatesCommand}"
+                                Style="{StaticResource SmallButton}" HorizontalContentAlignment="Left" Margin="0,0,0,6"/>
+                        <Button Content="Save activity report" Command="{Binding ExportLogCommand}"
+                                Style="{StaticResource SmallButton}" HorizontalContentAlignment="Left"/>
+                    </StackPanel>
+                </ScrollViewer>
             </Border>
 
-            <!-- RIGHT CONTENT AREA -->
             <DockPanel Grid.Column="1">
-                <!-- Category header -->
-                <Border DockPanel.Dock="Top"
-                        Background="{StaticResource BrushBg0}"
-                        Padding="14,8"
-                        BorderBrush="{StaticResource BrushBg2}"
-                        BorderThickness="0,0,0,1">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <Button Content="↶ Undo last apply"
-                                    Command="{Binding UndoLastApplyCommand}"
-                                    Style="{StaticResource SmallButton}"
-                                    Margin="0,0,8,0"
-                                    ToolTip="Restores registry and service settings saved before the last apply operation"/>
-                            <Button Content="↻ Check state"
-                                    Command="{Binding RefreshTweakStatesCommand}"
-                                    Style="{StaticResource SmallButton}"
-                                    Margin="0,0,8,0"
-                                    ToolTip="Checks registry and service settings without changing anything"/>
-                            <Button Content="👁 Preview"
-                                    Command="{Binding PreviewCommand}"
-                                    Style="{StaticResource SmallButton}"
-                                    Margin="0,0,8,0"/>
-                            <Button Content="📋 Export Log"
-                                    Command="{Binding ExportLogCommand}"
-                                    Style="{StaticResource SmallButton}"
-                                    Margin="0,0,8,0"/>
-                            <Button Content="✓ Select All"
-                                    Command="{Binding SelectedCategory.SelectAllCommand}"
-                                    Style="{StaticResource SmallButton}"
-                                    Margin="0,0,8,0"/>
-                            <Button Content="✕ Deselect All"
-                                    Command="{Binding SelectedCategory.DeselectAllCommand}"
-                                    Style="{StaticResource SmallButton}"/>
-                        </StackPanel>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock>
+                <Border DockPanel.Dock="Top" Background="{StaticResource BrushBg0}" Padding="16,10"
+                        BorderBrush="{StaticResource BrushBg2}" BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Foreground="{StaticResource BrushTextPrimary}">
+                                <Run Text="2. CHOOSE CHANGES  ·  " Foreground="{StaticResource BrushAccent}" FontWeight="Bold" FontSize="11"/>
                                 <Run Text="{Binding SelectedCategory.Icon}" FontSize="16"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedCategory.Name}"
-                                     FontWeight="SemiBold"
-                                     Foreground="{StaticResource BrushTextPrimary}"
-                                     FontSize="14"/>
+                                <Run Text="{Binding SelectedCategory.Name}" FontWeight="SemiBold" FontSize="14"/>
                             </TextBlock>
-                            <TextBlock Text="{Binding SelectedCategory.Description}"
-                                       Foreground="{StaticResource BrushTextSecondary}"
-                                       FontSize="11"/>
-                            <TextBlock Text="Blue OFF means the setting does not match. Green ACTIVE means every setting was verified."
-                                       Foreground="{StaticResource BrushTextMuted}"
-                                       FontSize="10" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding SelectedCategory.Description}" Foreground="{StaticResource BrushTextSecondary}"
+                                       FontSize="10.5" Margin="0,3,0,0"/>
+                            <TextBlock Text="Turn on SELECT for the changes you want. Green ‘Already on’ means Windows already uses that setting."
+                                       Foreground="{StaticResource BrushTextMuted}" FontSize="10" Margin="0,3,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
-                    </DockPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                            <Button Content="Select all in this category" Command="{Binding SelectedCategory.SelectAllCommand}"
+                                    Style="{StaticResource SmallButton}" Margin="0,0,8,0"/>
+                            <Button Content="Clear this category" Command="{Binding SelectedCategory.DeselectAllCommand}"
+                                    Style="{StaticResource SmallButton}"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
-
-                <!-- Tweaks list -->
-                <ScrollViewer DockPanel.Dock="Bottom"
-                              VerticalScrollBarVisibility="Auto"
-                              x:Name="TweakScroller">
-                    <ItemsControl ItemsSource="{Binding FilteredTweaks}"
-                                  ItemTemplate="{StaticResource TweakRowTemplate}"
-                                  Margin="8,4"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="TweakScroller">
+                    <ItemsControl ItemsSource="{Binding CurrentTweaks}" ItemTemplate="{StaticResource TweakRowTemplate}" Margin="9,5"/>
                 </ScrollViewer>
             </DockPanel>
         </Grid>
 
-        <!-- ══════════════════════════════════════════════════════════════════
-             LOG PANEL
-        ══════════════════════════════════════════════════════════════════════ -->
-        <Border Grid.Row="2"
-                Background="{StaticResource BrushBg0}"
-                BorderBrush="{StaticResource BrushBg2}"
+        <Border Grid.Row="3" Background="{StaticResource BrushBg0}" BorderBrush="{StaticResource BrushBg2}"
                 BorderThickness="0,1,0,0">
             <DockPanel>
-                <Border DockPanel.Dock="Top"
-                        Padding="12,5"
-                        Background="{StaticResource BrushBg1}"
-                        BorderBrush="{StaticResource BrushBg2}"
-                        BorderThickness="0,0,0,1">
+                <Border DockPanel.Dock="Top" Padding="12,5" Background="{StaticResource BrushBg1}"
+                        BorderBrush="{StaticResource BrushBg2}" BorderThickness="0,0,0,1">
                     <DockPanel>
-                        <Button DockPanel.Dock="Right"
-                                Content="Clear"
-                                Style="{StaticResource SmallButton}"
-                                Click="ClearLog_Click"/>
-                        <TextBlock Text="📋 LOG OUTPUT"
-                                   Foreground="{StaticResource BrushAccent}"
-                                   FontSize="10" FontWeight="Bold"
-                                   VerticalAlignment="Center"/>
+                        <Button DockPanel.Dock="Right" Content="Clear activity" Style="{StaticResource SmallButton}" Click="ClearLog_Click"/>
+                        <TextBlock Text="ACTIVITY" Foreground="{StaticResource BrushAccent}"
+                                   FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
                     </DockPanel>
                 </Border>
-                <ScrollViewer x:Name="LogScrollViewer"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              Padding="8,4">
-                    <ItemsControl x:Name="LogList"
-                                  ItemsSource="{Binding LogEntries}"
-                                  ItemTemplate="{StaticResource LogEntryTemplate}"/>
+                <ScrollViewer x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled" Padding="10,5">
+                    <ItemsControl ItemsSource="{Binding LogEntries}" ItemTemplate="{StaticResource LogEntryTemplate}"/>
                 </ScrollViewer>
             </DockPanel>
         </Border>
 
-        <!-- ══════════════════════════════════════════════════════════════════
-             STATUS BAR
-        ══════════════════════════════════════════════════════════════════════ -->
-        <Border Grid.Row="3"
-                Background="{StaticResource BrushBg1}"
-                BorderBrush="{StaticResource BrushBg2}"
-                BorderThickness="0,1,0,0"
-                Padding="12,0">
-            <DockPanel VerticalAlignment="Center">
-                <!-- Apply button on the right -->
-                <Button DockPanel.Dock="Right"
-                        Content="▶ Apply Selected"
-                        Command="{Binding ApplySelectedCommand}"
-                        Style="{StaticResource AccentButton}"
-                        Margin="0,0,12,0"
-                        IsEnabled="{Binding CanApply}"/>
-                
-                <!-- Indeterminate progress while applying -->
-                <ProgressBar DockPanel.Dock="Right"
-                             Width="120" Height="4"
-                             IsIndeterminate="{Binding IsApplying}"
+        <Border Grid.Row="4" Background="{StaticResource BrushBg1}" BorderBrush="{StaticResource BrushBg2}"
+                BorderThickness="0,1,0,0" Padding="14,9">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="3. APPLY YOUR CHANGES" Foreground="{StaticResource BrushAccent}"
+                               FontSize="11" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource BrushTextSecondary}"
+                               FontSize="11" Margin="0,3,0,0"/>
+                </StackPanel>
+                <ProgressBar Grid.Column="1" Height="5" IsIndeterminate="{Binding IsApplying}"
                              Visibility="{Binding IsApplying, Converter={StaticResource BoolToVis}}"
-                             Margin="0,0,12,0"/>
-                <TextBlock Text="{Binding StatusText}"
-                           Foreground="{StaticResource BrushTextSecondary}"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
-            </DockPanel>
+                             Margin="12,0" VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Content="{Binding ApplyButtonText}" Command="{Binding ApplySelectedCommand}"
+                        Style="{StaticResource PrimaryApplyButton}" IsEnabled="{Binding CanApply}"/>
+            </Grid>
         </Border>
     </Grid>
 </Window>

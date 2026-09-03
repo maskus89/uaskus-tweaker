@@ -1,6 +1,4 @@
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using UaskusTweaks.ViewModels;
 
@@ -9,7 +7,6 @@ namespace UaskusTweaks;
 public partial class MainWindow : Window
 {
     private readonly MainViewModel _vm;
-    private Button? _lastSelectedButton;
 
     public MainWindow()
     {
@@ -65,48 +62,4 @@ public partial class MainWindow : Window
     private void ClearLog_Click(object sender, RoutedEventArgs e)
         => _vm.LogEntries.Clear();
 
-    private void CategoryButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        if (sender is Button btn)
-        {
-            if (btn.Background != (System.Windows.Media.Brush)FindResource("BrushCyan"))
-            {
-                btn.Background = (System.Windows.Media.Brush)FindResource("BrushBg3");
-            }
-        }
-    }
-
-    private void CategoryButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        if (sender is Button btn)
-        {
-            if (btn.Background != (System.Windows.Media.Brush)FindResource("BrushCyan"))
-            {
-                btn.Background = (System.Windows.Media.Brush)FindResource("BrushBg2");
-            }
-        }
-    }
-
-    private void CategoryButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button clickedBtn && clickedBtn.Tag is TweakCategoryViewModel selectedCategory)
-        {
-            // Reset the previous button
-            if (_lastSelectedButton != null && _lastSelectedButton != clickedBtn)
-            {
-                _lastSelectedButton.Background = (System.Windows.Media.Brush)FindResource("BrushBg2");
-                _lastSelectedButton.Foreground = (System.Windows.Media.Brush)FindResource("BrushTextSecondary");
-            }
-            
-            // Highlight the clicked button
-            clickedBtn.Background = (System.Windows.Media.Brush)FindResource("BrushCyan");
-            clickedBtn.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Black);
-            
-            // Remember this button for next time
-            _lastSelectedButton = clickedBtn;
-            
-            // Update the view model
-            _vm.SelectedCategory = selectedCategory;
-        }
-    }
 }

@@ -37,10 +37,10 @@ public class TweakViewModel : BaseViewModel
 
     public string StateText => State switch
     {
-        TweakState.Enabled => "ACTIVE",
-        TweakState.PartiallyEnabled => "PARTIAL",
-        TweakState.NotEnabled => "OFF",
-        _ => "CHECK N/A"
+        TweakState.Enabled => "ALREADY ON",
+        TweakState.PartiallyEnabled => "PARTLY ON",
+        TweakState.NotEnabled => "NOT ON",
+        _ => "UNKNOWN"
     };
 
     public Brush StateColor => State switch
@@ -75,10 +75,10 @@ public class TweakViewModel : BaseViewModel
 
     public string RiskText => RiskLevel switch
     {
-        RiskLevel.Low => "LOW",
-        RiskLevel.Medium => "MED",
+        RiskLevel.Low => "SAFE",
+        RiskLevel.Medium => "CAUTION",
         RiskLevel.High => "HIGH",
-        RiskLevel.Critical => "CRIT",
+        RiskLevel.Critical => "EXTREME",
         _ => "?"
     };
 }
