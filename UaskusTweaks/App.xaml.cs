@@ -15,6 +15,9 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         var logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "uaskus_debug.log");
+        var fatalErrorShown = false;
+        var isSmokeTest = e.Args.Any(arg =>
+            string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase));
         
         void Log(string msg)
         {
@@ -38,8 +41,15 @@ public partial class App : Application
         DispatcherUnhandledException += (s, args) =>
         {
             Log($"Dispatcher Exception: {args.Exception.GetType().Name}: {args.Exception.Message}");
-            MessageBox.Show($"UI error:\n{args.Exception.Message}", "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            args.Handled = false;
+            // Stop WPF from repeatedly dispatching the same fatal layout error.
+            args.Handled = true;
+            if (fatalErrorShown)
+                return;
+
+            fatalErrorShown = true;
+            if (!isSmokeTest)
+                MessageBox.Show($"UI error:\n{args.Exception.Message}", "Uaskus Tweaks – Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
         };
 
         if (!IsRunningAsAdmin())
@@ -85,13 +95,23 @@ public partial class App : Application
             Log("MainWindow created, calling Show()");
             mainWindow.Show();
             Log("MainWindow shown");
+
+            if (isSmokeTest)
+            {
+                Log("Startup smoke test passed.");
+                mainWindow.Close();
+                Shutdown(0);
+                return;
+            }
+
             _ = CheckForUpdatesAsync(mainWindow, Log);
         }
         catch (Exception ex)
         {
             Log($"MainWindow creation failed: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}");
-            MessageBox.Show($"Failed to create window:\n{ex.Message}", "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            Shutdown();
+            if (!isSmokeTest)
+                MessageBox.Show($"Failed to create window:\n{ex.Message}", "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
             return;
         }
 

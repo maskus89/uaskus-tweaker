@@ -45,6 +45,19 @@ jobs:
           -p:Version=${{ steps.version.outputs.version }}
           -o publish
 
+      - name: Smoke test published executable
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "$PWD\publish\UaskusTweaks.exe" `
+            -ArgumentList '--smoke-test' -PassThru -Wait
+          if ($process.ExitCode -ne 0) {
+            $logPath = Join-Path $env:TEMP 'uaskus_debug.log'
+            if (Test-Path -LiteralPath $logPath) {
+              Get-Content -LiteralPath $logPath
+            }
+            throw "Startup smoke test failed with exit code $($process.ExitCode)."
+          }
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

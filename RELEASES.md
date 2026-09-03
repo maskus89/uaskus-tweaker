@@ -20,6 +20,11 @@ All releases with attached binaries are available on the
 
 ## Changelog
 
+### v2.2.1
+- Fixed the startup crash caused by a two-way WPF binding to a read-only property
+- Prevented repeated UI exceptions from overflowing the process stack
+- Added a release executable smoke test so a build that cannot open is never uploaded
+
 ### v2.2.0
 - Checks the latest stable GitHub release when the app starts
 - Downloads, verifies, installs, and restarts updates automatically after confirmation

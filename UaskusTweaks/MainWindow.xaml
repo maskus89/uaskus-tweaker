@@ -253,7 +253,7 @@
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontSize="10.5" FontWeight="SemiBold"/>
                                     <TextBlock FontSize="9" Opacity="0.78" Margin="0,2,0,0">
-                                        <Run Text="{Binding SelectedCount}"/>
+                                        <Run Text="{Binding SelectedCount, Mode=OneWay}"/>
                                         <Run Text=" selected"/>
                                     </TextBlock>
                                 </StackPanel>
