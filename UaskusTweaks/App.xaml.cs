@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Security.Principal;
 using System.Windows;
+using System.Windows.Input;
+using UaskusTweaks.Services;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using MessageBoxButton = System.Windows.MessageBoxButton;
@@ -83,6 +85,7 @@ public partial class App : Application
             Log("MainWindow created, calling Show()");
             mainWindow.Show();
             Log("MainWindow shown");
+            _ = CheckForUpdatesAsync(mainWindow, Log);
         }
         catch (Exception ex)
         {
@@ -93,6 +96,67 @@ public partial class App : Application
         }
 
         base.OnStartup(e);
+    }
+
+    private async Task CheckForUpdatesAsync(MainWindow owner, Action<string> log)
+    {
+        await Task.Delay(1200);
+        var updater = new UpdateService();
+
+        UpdateInfo? update;
+        try
+        {
+            update = await updater.CheckForUpdateAsync();
+        }
+        catch (Exception ex)
+        {
+            // An unavailable network should never interrupt normal startup.
+            log($"Update check skipped: {ex.Message}");
+            return;
+        }
+
+        if (update is null)
+        {
+            log($"No update available. Current version: {UpdateService.CurrentVersion.ToString(3)}");
+            return;
+        }
+
+        log($"Update available: {update.TagName}");
+        var result = MessageBox.Show(owner,
+            $"A new version of Uaskus Tweaks is available.\n\n" +
+            $"Current version: {UpdateService.CurrentVersion.ToString(3)}\n" +
+            $"New version: {update.Version.ToString(3)}\n\n" +
+            "Download it now? The app will restart automatically when it is ready.",
+            "Update available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            log("User postponed the update.");
+            return;
+        }
+
+        owner.SetStatusMessage($"Downloading update {update.Version.ToString(3)}…");
+        owner.Cursor = Cursors.Wait;
+        try
+        {
+            var downloadedExecutable = await updater.DownloadAsync(update);
+            owner.SetStatusMessage("Update downloaded. Restarting…");
+            updater.InstallAndRestart(downloadedExecutable);
+            Shutdown();
+        }
+        catch (Exception ex)
+        {
+            log($"Update failed: {ex.Message}");
+            owner.SetStatusMessage("The update could not be installed. You can keep using the app.");
+            MessageBox.Show(owner,
+                "The update could not be installed automatically. The current version is still safe to use.\n\n" +
+                $"Details: {ex.Message}",
+                "Update failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        finally
+        {
+            owner.Cursor = null;
+        }
     }
 
     private static bool IsRunningAsAdmin()

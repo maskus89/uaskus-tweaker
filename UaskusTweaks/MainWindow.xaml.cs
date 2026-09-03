@@ -62,4 +62,7 @@ public partial class MainWindow : Window
     private void ClearLog_Click(object sender, RoutedEventArgs e)
         => _vm.LogEntries.Clear();
 
+    public void SetStatusMessage(string message)
+        => _vm.SetStatusMessage(message);
+
 }

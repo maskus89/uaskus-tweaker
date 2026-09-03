@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:UaskusTweaks.ViewModels"
         xmlns:models="clr-namespace:UaskusTweaks.Models"
-        Title="Uaskus Tweaks v2.1"
+        Title="Uaskus Tweaks"
         Width="1220" Height="820"
         MinWidth="920" MinHeight="620"
         Background="{StaticResource BrushBg0}"
@@ -188,7 +188,7 @@
                     <TextBlock Text="⚡" FontSize="18" Foreground="{StaticResource BrushCyan}" Margin="0,0,8,0"/>
                     <TextBlock Text="UASKUS TWEAKS" FontSize="16" FontWeight="Bold"
                                Foreground="{StaticResource BrushTextPrimary}" VerticalAlignment="Center"/>
-                    <TextBlock Text=" v2.1" FontSize="11" Foreground="{StaticResource BrushTextMuted}"
+                    <TextBlock Text="{Binding DisplayVersion, StringFormat={} {0}}" FontSize="11" Foreground="{StaticResource BrushTextMuted}"
                                VerticalAlignment="Center" Margin="2,2,0,0"/>
                     <Border Margin="16,0,0,0" Padding="7,3" CornerRadius="3" VerticalAlignment="Center">
                         <Border.Style>

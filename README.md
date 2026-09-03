@@ -18,9 +18,9 @@ A modern WPF GUI application for Windows 10/11 optimization — a professional r
 
 ### Latest Release (Recommended)
 
-Go to the [**Releases page**](https://github.com/maskus89/uaskus-tweaker/releases/latest) and download `UaskusTweaks.zip`.
+Download [**UaskusTweaks.exe**](https://github.com/maskus89/uaskus-tweaker/releases/latest/download/UaskusTweaks.exe) and run it as **Administrator**. No installation or extraction is needed.
 
-Extract the zip and run `UaskusTweaks.exe` as **Administrator**.
+The app checks the latest stable GitHub release when it starts and offers to download and restart when an update is available.
 
 ### CI Build Artifact
 
@@ -40,12 +40,11 @@ Every push to `main` also produces a build artifact:
 
 ## How to Use
 
-1. Download `UaskusTweaks.zip` from the [Releases page](https://github.com/maskus89/uaskus-tweaker/releases/latest)
-2. Extract `UaskusTweaks.exe`
-3. Right-click → **Run as administrator**
-4. Choose a category across the top, or use an Easy Setup preset on the left
-5. Turn on **SELECT** for the changes you want
-6. Click the large **Apply selected changes** button (a restore point is created automatically)
+1. Download [UaskusTweaks.exe](https://github.com/maskus89/uaskus-tweaker/releases/latest/download/UaskusTweaks.exe)
+2. Right-click → **Run as administrator**
+3. Choose a category across the top, or use an Easy Setup preset on the left
+4. Turn on **SELECT** for the changes you want
+5. Click the large **Apply selected changes** button (a restore point is created automatically)
 
 ## Build Locally
 
@@ -83,11 +82,11 @@ The finished executable will be at `publish\UaskusTweaks.exe`.
 Push a version tag to trigger the release workflow automatically:
 
 ```bash
-git tag v2.1.0
-git push origin v2.1.0
+git tag v2.2.0
+git push origin v2.2.0
 ```
 
-The workflow will build the executable, package it as `UaskusTweaks.zip`, and create a GitHub Release with the zip attached.
+The workflow builds `UaskusTweaks.exe` with the tag version and attaches that executable to the GitHub Release. The tag must use a numeric version such as `v2.2.0` so installed apps can compare versions correctly.
 
 ## Project Structure
 

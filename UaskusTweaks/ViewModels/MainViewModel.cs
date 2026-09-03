@@ -34,6 +34,7 @@ public class MainViewModel : BaseViewModel
 
     public bool IsAdmin { get; } = new WindowsPrincipal(WindowsIdentity.GetCurrent())
         .IsInRole(WindowsBuiltInRole.Administrator);
+    public string DisplayVersion => $"v{UpdateService.CurrentVersion.ToString(3)}";
 
     public TweakCategoryViewModel? SelectedCategory
     {
@@ -81,6 +82,8 @@ public class MainViewModel : BaseViewModel
         get => _statusText;
         private set => SetProperty(ref _statusText, value);
     }
+
+    public void SetStatusMessage(string message) => StatusText = message;
 
     public IEnumerable<TweakViewModel> CurrentTweaks =>
         SelectedCategory?.Tweaks ?? Enumerable.Empty<TweakViewModel>();

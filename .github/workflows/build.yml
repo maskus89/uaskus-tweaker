@@ -24,6 +24,17 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore UaskusTweaks/UaskusTweaks.csproj
 
+      - name: Determine build version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            VERSION=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' UaskusTweaks/UaskusTweaks.csproj | head -1)
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish single-file executable
         run: >
           dotnet publish UaskusTweaks/UaskusTweaks.csproj
@@ -31,34 +42,20 @@ jobs:
           -r win-x64
           --self-contained true
           -p:PublishSingleFile=true
+          -p:Version=${{ steps.version.outputs.version }}
           -o publish
-
-      - name: Package artifact as zip
-        shell: pwsh
-        run: Compress-Archive -Path publish/* -DestinationPath publish/UaskusTweaks.zip
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: UaskusTweaks-exe
-          path: publish/UaskusTweaks.zip
+          path: publish/UaskusTweaks.exe
 
-      - name: Determine release version
-        id: version
-        shell: bash
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-            echo "is_tag=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=v2.0.0" >> "$GITHUB_OUTPUT"
-            echo "is_tag=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create or update GitHub Release
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.version.outputs.tag }}
+          TAG: ${{ github.ref_name }}
         shell: bash
         run: |
           cat > release-notes.md <<'EOF'
@@ -82,15 +79,22 @@ jobs:
           1. Download **UaskusTweaks.exe** and run it
           2. Click **Yes** when the admin prompt appears
           3. Select the tweaks you want to apply and click **Apply**
+          4. Future updates are offered automatically when the app starts
 
-          ### Downloads
-          - **UaskusTweaks.exe** - Quick download, no extraction needed. Just run!
-          - **UaskusTweaks.zip** - Includes all dependencies for portable use
+          ### Download
+          - **UaskusTweaks.exe** - No installation or extraction needed
           EOF
 
-          gh release delete "$TAG" --yes 2>/dev/null || true
-          git push origin ":refs/tags/$TAG" 2>/dev/null || true
-          gh release create "$TAG" publish/UaskusTweaks.exe publish/UaskusTweaks.zip \
-            --title "Uaskus Tweaker $TAG - WPF Edition" \
-            --notes-file release-notes.md \
-            --latest
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" publish/UaskusTweaks.exe --clobber
+            gh release edit "$TAG" \
+              --title "Uaskus Tweaker $TAG - WPF Edition" \
+              --notes-file release-notes.md \
+              --latest
+          else
+            gh release create "$TAG" publish/UaskusTweaks.exe \
+              --verify-tag \
+              --title "Uaskus Tweaker $TAG - WPF Edition" \
+              --notes-file release-notes.md \
+              --latest
+          fi
