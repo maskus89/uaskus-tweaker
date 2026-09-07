@@ -53,7 +53,6 @@ public class MainViewModel : BaseViewModel
             OnPropertyChanged(nameof(IsExtremePerformanceMode));
             OnPropertyChanged(nameof(ActiveSetupTitle));
             OnPropertyChanged(nameof(ActiveSetupDescription));
-            OnPropertyChanged(nameof(CategoryCardWidth));
         }
     }
 
@@ -62,7 +61,6 @@ public class MainViewModel : BaseViewModel
     public bool IsPrivacyMode => ActiveSetupMode == SetupMode.Privacy;
     public bool IsPerformanceMode => ActiveSetupMode == SetupMode.Performance;
     public bool IsExtremePerformanceMode => ActiveSetupMode == SetupMode.ExtremePerformance;
-    public double CategoryCardWidth => IsFullAccessMode ? 122 : 190;
     public string ActiveSetupTitle => ActiveSetupMode switch
     {
         SetupMode.Gaming => "Gaming folders",

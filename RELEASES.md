@@ -20,6 +20,12 @@ All releases with attached binaries are available on the
 
 ## Changelog
 
+### v2.3.1
+- Easy Setup folders stretch equally across the available row with larger labels
+- Window startup size adapts to the monitor work area and DPI
+- Wrapped labels and flexible layout prevent text and badges from overlapping
+- Pixel-aligned text and opacity animations keep lettering sharp
+
 ### v2.3.0
 - Easy Setup modes now show only the folders used by the selected preset
 - Added Full Access to restore every tweak folder without losing selections

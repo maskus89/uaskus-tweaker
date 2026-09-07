@@ -6,6 +6,8 @@
         Title="Uaskus Tweaks"
         Width="1220" Height="820"
         MinWidth="920" MinHeight="620"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType"
         Background="{StaticResource BrushBg0}"
         WindowStyle="None"
         AllowsTransparency="False"
@@ -14,19 +16,32 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
 
         <Style x:Key="CategoryListStyle" TargetType="ListBox">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="ItemsPanel">
                 <Setter.Value>
                     <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
+                        <UniformGrid Rows="1"/>
                     </ItemsPanelTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsFullAccessMode}" Value="True">
+                    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+                    <Setter Property="ItemsPanel">
+                        <Setter.Value>
+                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="CategoryItemStyle" TargetType="ListBoxItem">
@@ -35,8 +50,8 @@
             <Setter Property="BorderBrush" Value="{StaticResource BrushBg3}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
-            <Setter Property="Width" Value="{Binding DataContext.CategoryCardWidth, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+            <Setter Property="Margin" Value="4,3"/>
+            <Setter Property="FontSize" Value="18"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
@@ -52,22 +67,20 @@
                             <Border.RenderTransform>
                                 <ScaleTransform x:Name="CategoryScale" ScaleX="1" ScaleY="1"/>
                             </Border.RenderTransform>
-                            <ContentPresenter/>
+                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <EventTrigger RoutedEvent="MouseEnter">
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleX" To="1.025" Duration="0:0:0.12"/>
-                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleY" To="1.025" Duration="0:0:0.12"/>
+                                        <DoubleAnimation Storyboard.TargetName="Card" Storyboard.TargetProperty="Opacity" To="0.92" Duration="0:0:0.12"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
                             <EventTrigger RoutedEvent="MouseLeave">
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.14"/>
-                                        <DoubleAnimation Storyboard.TargetName="CategoryScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.14"/>
+                                        <DoubleAnimation Storyboard.TargetName="Card" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.14"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
@@ -91,6 +104,12 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsFullAccessMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="Width" Value="190"/>
+                    <Setter Property="FontSize" Value="14"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="PresetButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
@@ -120,9 +139,9 @@
                     <ColumnDefinition Width="58"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss}}"
+                <TextBlock TextWrapping="Wrap" Grid.Column="0" Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss}}"
                            Foreground="{StaticResource BrushTextMuted}" FontSize="11" FontFamily="Consolas"/>
-                <TextBlock Grid.Column="1" Text="{Binding LogLevel}" FontSize="11"
+                <TextBlock TextWrapping="Wrap" Grid.Column="1" Text="{Binding LogLevel}" FontSize="11"
                            FontFamily="Consolas" FontWeight="SemiBold">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
@@ -162,20 +181,20 @@
                                        FontSize="14" LineHeight="20" TextWrapping="Wrap" Margin="0,8,0,12"/>
                             <WrapPanel>
                                 <Border Background="{Binding RiskColor}" CornerRadius="4" Padding="8,4" Margin="0,0,7,5">
-                                    <TextBlock Text="{Binding RiskText, StringFormat=Risk: {0}}" Foreground="#1e1e2e"
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding RiskText, StringFormat=Risk: {0}}" Foreground="#1e1e2e"
                                                FontSize="11" FontWeight="Bold"/>
                                 </Border>
                                 <Border Background="{Binding StateColor}" CornerRadius="4" Padding="8,4" Margin="0,0,7,5">
-                                    <TextBlock Text="{Binding StateText, StringFormat=Current: {0}}" Foreground="White"
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding StateText, StringFormat=Current: {0}}" Foreground="White"
                                                FontSize="11" FontWeight="SemiBold"/>
                                 </Border>
                                 <Border Background="#7f1d1d" CornerRadius="4" Padding="8,4" Margin="0,0,7,5"
                                         Visibility="{Binding IsAdminRequired, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="Administrator required" Foreground="#fca5a5" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock TextWrapping="Wrap" Text="Administrator required" Foreground="#fca5a5" FontSize="11" FontWeight="SemiBold"/>
                                 </Border>
                                 <Border Background="#78350f" CornerRadius="4" Padding="8,4" Margin="0,0,7,5"
                                         Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="Restart required" Foreground="#fcd34d" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock TextWrapping="Wrap" Text="Restart required" Foreground="#fcd34d" FontSize="11" FontWeight="SemiBold"/>
                                 </Border>
                             </WrapPanel>
                         </StackPanel>
@@ -191,36 +210,36 @@
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <ToggleButton IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                       Style="{StaticResource ToggleSwitchStyle}"/>
-                        <TextBlock Text="SELECT" Foreground="{StaticResource BrushTextMuted}"
+                        <TextBlock TextWrapping="Wrap" Text="SELECT" Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="10,0,16,0" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Name}" Foreground="{StaticResource BrushTextPrimary}"
+                        <StackPanel>
+                            <TextBlock TextWrapping="Wrap" Text="{Binding Name}" Foreground="{StaticResource BrushTextPrimary}"
                                        FontWeight="SemiBold" FontSize="16"/>
-                            <TextBlock Text="  Administrator access" Foreground="{StaticResource BrushWarning}"
+                            <TextBlock TextWrapping="Wrap" Text="  Administrator access" Foreground="{StaticResource BrushWarning}"
                                        FontSize="10" VerticalAlignment="Center"
                                        Visibility="{Binding IsAdminRequired, Converter={StaticResource BoolToVis}}"/>
                         </StackPanel>
                         <TextBlock Text="{Binding Description}" Foreground="{StaticResource BrushTextSecondary}"
                                    FontSize="13" LineHeight="18" TextWrapping="Wrap" Margin="0,4,0,0"/>
-                        <TextBlock Text="Restart needed after applying" Foreground="{StaticResource BrushWarning}"
+                        <TextBlock TextWrapping="Wrap" Text="Restart needed after applying" Foreground="{StaticResource BrushWarning}"
                                    FontSize="10" Margin="0,4,0,0"
                                    Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="CURRENTLY" Foreground="{StaticResource BrushTextMuted}"
+                        <TextBlock TextWrapping="Wrap" Text="CURRENTLY" Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                         <Border Background="{Binding StateColor}" CornerRadius="4" Padding="8,4" MinWidth="82">
-                            <TextBlock Text="{Binding StateText}" Foreground="White" TextAlignment="Center"
+                            <TextBlock TextWrapping="Wrap" Text="{Binding StateText}" Foreground="White" TextAlignment="Center"
                                        FontSize="10.5" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
                     <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="RISK" Foreground="{StaticResource BrushTextMuted}"
+                        <TextBlock TextWrapping="Wrap" Text="RISK" Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                         <Border Background="{Binding RiskColor}" CornerRadius="4" Padding="8,4" MinWidth="72">
-                            <TextBlock Text="{Binding RiskText}" Foreground="#1e1e2e" TextAlignment="Center"
+                            <TextBlock TextWrapping="Wrap" Text="{Binding RiskText}" Foreground="#1e1e2e" TextAlignment="Center"
                                        FontSize="10.5" FontWeight="Bold"/>
                         </Border>
                     </StackPanel>
@@ -232,10 +251,10 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="48"/>
-            <RowDefinition Height="104"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="128"/>
-            <RowDefinition Height="72"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="{StaticResource BrushBg0}" BorderBrush="{StaticResource BrushBg2}"
@@ -246,10 +265,10 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="⚡" FontSize="18" Foreground="{StaticResource BrushCyan}" Margin="0,0,8,0"/>
-                    <TextBlock Text="UASKUS TWEAKS" FontSize="16" FontWeight="Bold"
+                    <TextBlock TextWrapping="Wrap" Text="⚡" FontSize="18" Foreground="{StaticResource BrushCyan}" Margin="0,0,8,0"/>
+                    <TextBlock TextWrapping="Wrap" Text="UASKUS TWEAKS" FontSize="16" FontWeight="Bold"
                                Foreground="{StaticResource BrushTextPrimary}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding DisplayVersion, StringFormat={} {0}}" FontSize="11" Foreground="{StaticResource BrushTextMuted}"
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DisplayVersion, StringFormat={} {0}}" FontSize="11" Foreground="{StaticResource BrushTextMuted}"
                                VerticalAlignment="Center" Margin="2,2,0,0"/>
                     <Border Margin="16,0,0,0" Padding="7,3" CornerRadius="3" VerticalAlignment="Center">
                         <Border.Style>
@@ -262,7 +281,7 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <TextBlock VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold">
+                        <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Text" Value="✓ Ready to make changes"/>
@@ -297,28 +316,29 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center" Margin="2,0,14,0">
-                    <TextBlock Text="{Binding ActiveSetupTitle}" Foreground="{StaticResource BrushAccent}"
+                    <TextBlock TextWrapping="Wrap" Text="{Binding ActiveSetupTitle}" Foreground="{StaticResource BrushAccent}"
                                FontSize="13" FontWeight="Bold"/>
                     <TextBlock Text="{Binding ActiveSetupDescription}"
                                Foreground="{StaticResource BrushTextSecondary}" FontSize="10.5"
                                TextWrapping="Wrap" Margin="0,4,0,0"/>
                 </StackPanel>
-                <ListBox Grid.Column="1" ItemsSource="{Binding VisibleCategories}"
+                <ListBox x:Name="CategorySelector" Grid.Column="1" ItemsSource="{Binding VisibleCategories}"
                          SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
                          Style="{StaticResource CategoryListStyle}"
                          ItemContainerStyle="{StaticResource CategoryItemStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:TweakCategoryViewModel}">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Icon}" FontSize="21" Margin="0,0,9,0" VerticalAlignment="Center"/>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"/>
-                                    <TextBlock FontSize="10.5" Opacity="0.82" Margin="0,3,0,0">
+                            <Grid MinHeight="62">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <TextBlock TextWrapping="Wrap" Text="{Binding Icon}" FontSize="24" Margin="0,0,9,0" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding Name}" FontWeight="SemiBold"/>
+                                    <TextBlock TextWrapping="Wrap" FontSize="10.5" Opacity="0.82" Margin="0,3,0,0">
                                         <Run Text="{Binding SelectedCount, Mode=OneWay}"/>
                                         <Run Text=" selected"/>
                                     </TextBlock>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -334,7 +354,7 @@
                     BorderThickness="0,0,1,0" Padding="14,12">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
-                        <TextBlock Text="EASY SETUP" Foreground="{StaticResource BrushAccent}"
+                        <TextBlock TextWrapping="Wrap" Text="EASY SETUP" Foreground="{StaticResource BrushAccent}"
                                    FontSize="11" FontWeight="Bold"/>
                         <TextBlock Text="A setup selects recommendations and opens only its folders. Nothing changes until you press Apply."
                                    Foreground="{StaticResource BrushTextSecondary}" FontSize="10.5"
@@ -342,40 +362,40 @@
                         <Button Command="{Binding FullAccessCommand}" Style="{StaticResource PresetButton}"
                                 Tag="{Binding IsFullAccessMode}">
                             <StackPanel>
-                                <TextBlock Text="📂 Full Access" FontSize="14" FontWeight="SemiBold"/>
-                                <TextBlock Text="Show every tweak folder" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
+                                <TextBlock TextWrapping="Wrap" Text="📂 Full Access" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock TextWrapping="Wrap" Text="Show every tweak folder" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding GamingPresetCommand}" Style="{StaticResource PresetButton}"
                                 Tag="{Binding IsGamingMode}">
                             <StackPanel>
-                                <TextBlock Text="🎮 Gaming" FontSize="14" FontWeight="SemiBold"/>
-                                <TextBlock Text="Smoother games and lower delay" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
+                                <TextBlock TextWrapping="Wrap" Text="🎮 Gaming" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock TextWrapping="Wrap" Text="Smoother games and lower delay" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding PrivacyPresetCommand}" Style="{StaticResource PresetButton}"
                                 Tag="{Binding IsPrivacyMode}">
                             <StackPanel>
-                                <TextBlock Text="🛡 Privacy" FontSize="14" FontWeight="SemiBold"/>
-                                <TextBlock Text="Reduce tracking and diagnostics" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
+                                <TextBlock TextWrapping="Wrap" Text="🛡 Privacy" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock TextWrapping="Wrap" Text="Reduce tracking and diagnostics" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding MaxPerformanceCommand}" Style="{StaticResource PresetButton}"
                                 Tag="{Binding IsPerformanceMode}">
                             <StackPanel>
-                                <TextBlock Text="⚡ Performance" FontSize="14" FontWeight="SemiBold"/>
-                                <TextBlock Text="Make Windows feel faster" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
+                                <TextBlock TextWrapping="Wrap" Text="⚡ Performance" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock TextWrapping="Wrap" Text="Make Windows feel faster" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding ExtremePerformanceCommand}" Style="{StaticResource PresetButton}"
                                 Tag="{Binding IsExtremePerformanceMode}">
                             <StackPanel>
-                                <TextBlock Text="⚠ Extreme performance" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource BrushWarning}"/>
-                                <TextBlock Text="Experts only; includes risky changes" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
+                                <TextBlock TextWrapping="Wrap" Text="⚠ Extreme performance" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource BrushWarning}"/>
+                                <TextBlock TextWrapping="Wrap" Text="Experts only; includes risky changes" Foreground="{StaticResource BrushTextSecondary}" FontSize="11.5" Margin="0,3,0,0"/>
                             </StackPanel>
                         </Button>
                         <Separator Margin="0,5,0,10"/>
-                        <TextBlock Text="SAFETY" Foreground="{StaticResource BrushTextMuted}"
+                        <TextBlock TextWrapping="Wrap" Text="SAFETY" Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
                         <CheckBox IsChecked="{Binding CreateRestorePoint}" Content="Create a restore point first" FontSize="11"/>
                         <TextBlock Text="Recommended. This gives Windows a recovery point before changes are made."
@@ -384,7 +404,7 @@
                         <Button Content="↶ Undo the last apply" Command="{Binding UndoLastApplyCommand}"
                                 Style="{StaticResource SmallButton}" HorizontalContentAlignment="Left"/>
                         <Separator Margin="0,10"/>
-                        <TextBlock Text="TOOLS" Foreground="{StaticResource BrushTextMuted}"
+                        <TextBlock TextWrapping="Wrap" Text="TOOLS" Foreground="{StaticResource BrushTextMuted}"
                                    FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
                         <Button Content="Review selected changes" Command="{Binding PreviewCommand}"
                                 Style="{StaticResource SmallButton}" HorizontalContentAlignment="Left" Margin="0,0,0,6"/>
@@ -400,31 +420,28 @@
                 <Border DockPanel.Dock="Top" Background="{StaticResource BrushBg0}" Padding="16,10"
                         BorderBrush="{StaticResource BrushBg2}" BorderThickness="0,0,0,1">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                         <StackPanel>
-                            <TextBlock Foreground="{StaticResource BrushTextPrimary}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource BrushTextPrimary}">
                                 <Run Text="CHOOSE CHANGES  ·  " Foreground="{StaticResource BrushAccent}" FontWeight="Bold" FontSize="12"/>
                                 <Run Text="{Binding SelectedCategory.Icon}" FontSize="16"/>
                                 <Run Text=" "/>
                                 <Run Text="{Binding SelectedCategory.Name}" FontWeight="SemiBold" FontSize="16"/>
                             </TextBlock>
-                            <TextBlock Text="{Binding SelectedCategory.Description}" Foreground="{StaticResource BrushTextSecondary}"
+                            <TextBlock TextWrapping="Wrap" Text="{Binding SelectedCategory.Description}" Foreground="{StaticResource BrushTextSecondary}"
                                        FontSize="10.5" Margin="0,3,0,0"/>
                             <TextBlock Text="Hover over a tweak for a full explanation. Turn on SELECT, review it, then press Apply."
                                        Foreground="{StaticResource BrushTextMuted}" FontSize="10" Margin="0,3,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                        <WrapPanel Grid.Row="1" Margin="0,8,0,0">
                             <Button Content="Select all in this category" Command="{Binding SelectedCategory.SelectAllCommand}"
                                     Style="{StaticResource SmallButton}" Margin="0,0,8,0"/>
                             <Button Content="Clear this category" Command="{Binding SelectedCategory.DeselectAllCommand}"
                                     Style="{StaticResource SmallButton}"/>
-                        </StackPanel>
+                        </WrapPanel>
                     </Grid>
                 </Border>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="TweakScroller">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="TweakScroller">
                     <ItemsControl ItemsSource="{Binding CurrentTweaks}" ItemTemplate="{StaticResource TweakRowTemplate}" Margin="9,5"/>
                 </ScrollViewer>
             </DockPanel>
@@ -437,7 +454,7 @@
                         BorderBrush="{StaticResource BrushBg2}" BorderThickness="0,0,0,1">
                     <DockPanel>
                         <Button DockPanel.Dock="Right" Content="Clear activity" Style="{StaticResource SmallButton}" Click="ClearLog_Click"/>
-                        <TextBlock Text="ACTIVITY" Foreground="{StaticResource BrushAccent}"
+                        <TextBlock TextWrapping="Wrap" Text="ACTIVITY" Foreground="{StaticResource BrushAccent}"
                                    FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
                     </DockPanel>
                 </Border>
@@ -453,16 +470,17 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="3. APPLY YOUR CHANGES" Foreground="{StaticResource BrushAccent}"
+                    <TextBlock TextWrapping="Wrap" Text="3. APPLY YOUR CHANGES" Foreground="{StaticResource BrushAccent}"
                                FontSize="11" FontWeight="Bold"/>
-                    <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource BrushTextSecondary}"
+                    <TextBlock TextWrapping="Wrap" Text="{Binding StatusText}" Foreground="{StaticResource BrushTextSecondary}"
                                FontSize="11" Margin="0,3,0,0"/>
                 </StackPanel>
                 <ProgressBar Grid.Column="1" Height="5" IsIndeterminate="{Binding IsApplying}"
+                             Width="60"
                              Visibility="{Binding IsApplying, Converter={StaticResource BoolToVis}}"
                              Margin="12,0" VerticalAlignment="Center"/>
                 <Button Grid.Column="2" Content="{Binding ApplyButtonText}" Command="{Binding ApplySelectedCommand}"

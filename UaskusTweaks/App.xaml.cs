@@ -148,6 +148,7 @@ public partial class App : Application
         {
             command.Execute(null);
             window.UpdateLayout();
+            window.ValidateResponsiveCategories();
 
             var actualCategories = viewModel.VisibleCategories.Select(category => category.Name).ToArray();
             if (viewModel.ActiveSetupMode != expectedMode ||

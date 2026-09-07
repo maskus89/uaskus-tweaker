@@ -76,32 +76,28 @@
                         <EventTrigger RoutedEvent="MouseEnter">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleX" To="1.02" Duration="0:0:0.12"/>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleY" To="1.02" Duration="0:0:0.12"/>
+                                    <DoubleAnimation Storyboard.TargetName="bd" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12"/>
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
                         <EventTrigger RoutedEvent="MouseLeave">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.14"/>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.14"/>
+                                    <DoubleAnimation Storyboard.TargetName="bd" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.14"/>
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
                         <EventTrigger RoutedEvent="PreviewMouseDown">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleX" To="0.97" Duration="0:0:0.06"/>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleY" To="0.97" Duration="0:0:0.06"/>
+                                    <DoubleAnimation Storyboard.TargetName="bd" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.06"/>
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
                         <EventTrigger RoutedEvent="PreviewMouseUp">
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleX" To="1.02" Duration="0:0:0.10"/>
-                                    <DoubleAnimation Storyboard.TargetName="ButtonScale" Storyboard.TargetProperty="ScaleY" To="1.02" Duration="0:0:0.10"/>
+                                    <DoubleAnimation Storyboard.TargetName="bd" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.10"/>
                                 </Storyboard>
                             </BeginStoryboard>
                         </EventTrigger>
