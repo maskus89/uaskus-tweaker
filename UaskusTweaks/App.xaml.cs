@@ -13,8 +13,21 @@ namespace UaskusTweaks;
 
 public partial class App : Application
 {
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
+        if (e.Args.Any(arg => arg.Equals("--audit-tweaks", StringComparison.OrdinalIgnoreCase) ||
+                              arg.Equals("--test-tweaks", StringComparison.OrdinalIgnoreCase)))
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            try { Shutdown(await TweakDiagnostics.RunAsync(e.Args)); }
+            catch (Exception ex)
+            {
+                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "uaskus_debug.log"),
+                    $"Diagnostics failed: {ex}\n");
+                Shutdown(1);
+            }
+            return;
+        }
         var logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "uaskus_debug.log");
         var fatalErrorShown = false;
         var isSmokeTest = e.Args.Any(arg =>
@@ -127,7 +140,7 @@ public partial class App : Application
 
         Validate(viewModel.GamingPresetCommand, SetupMode.Gaming, 10,
             "Essential Tweaks", "Ultimate Performance", "Gaming Tweaks");
-        Validate(viewModel.PrivacyPresetCommand, SetupMode.Privacy, 11,
+        Validate(viewModel.PrivacyPresetCommand, SetupMode.Privacy, 10,
             "Essential Tweaks", "Privacy Tweaks");
         Validate(viewModel.MaxPerformanceCommand, SetupMode.Performance, 11,
             "Essential Tweaks", "Ultimate Performance", "Gaming Tweaks");

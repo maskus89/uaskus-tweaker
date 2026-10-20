@@ -62,7 +62,8 @@ public sealed class TweakStateDetector
         if (parts.Length < 4 || !Enum.TryParse<RegistryValueKind>(parts[3], out var kind))
             return null;
 
-        if (!_registry.TryGetValue(parts[0], parts[1], out var actual, out var actualKind) || actualKind != kind)
+        if (!_registry.TryGetValue(parts[0], parts[1], out var actual, out var actualKind) ||
+            actual is null || actualKind != kind)
             return false;
 
         try

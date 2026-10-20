@@ -16,6 +16,8 @@ public class Tweak : INotifyPropertyChanged
     public bool RequiresRestart { get; set; }
     public string Tooltip { get; set; } = string.Empty;
     public List<TweakCommand> Commands { get; set; } = new();
+    public string? ExclusiveGroup { get; set; }
+    public int ApplyOrder { get; set; }
 
     public bool IsEnabled
     {

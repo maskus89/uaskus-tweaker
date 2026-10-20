@@ -171,7 +171,7 @@ public class MainViewModel : BaseViewModel
             "essential_telemetry", "essential_activity", "essential_consumer",
             "priv_telemetry_svc", "priv_adid", "priv_cortana", "priv_feedback",
             "priv_websearch", "priv_tailored",
-            "priv_diagdata", "priv_errorreporting"));
+            "priv_errorreporting"));
 
         MaxPerformanceCommand = new RelayCommand(_ => ApplyPreset(SetupMode.Performance, "Max Performance Preset",
             "perf_power_ultimate", "perf_core_parking", "perf_cpu_100",
@@ -283,14 +283,15 @@ public class MainViewModel : BaseViewModel
 
     private async Task ApplyTweaksAsync()
     {
-        var selected = Categories.SelectMany(c => c.Tweaks).Where(t => t.IsSelected).ToList();
+        var selected = Categories.SelectMany(c => c.Tweaks).Where(t => t.IsSelected)
+            .OrderBy(t => t.Model.ApplyOrder).ToList();
         if (selected.Count == 0)
         {
             AddLog("No tweaks selected.", LogLevel.Warning);
             return;
         }
 
-        var conflicts = FindConflicts(selected);
+        var conflicts = TweakSelectionValidator.FindConflicts(selected.Select(t => t.Model));
         if (conflicts.Count > 0)
         {
             AddLog("Conflicting selections blocked: " + string.Join(", ", conflicts), LogLevel.Warning);
@@ -348,17 +349,25 @@ public class MainViewModel : BaseViewModel
                 {
                     var (success, message) = await _executor.ExecuteAsync(cmd);
                     if (success)
-                        AddLog($"  ✓ {cmd.Description ?? cmd.Command}", LogLevel.Success);
+                        AddLog($"  ✓ {cmd.Description ?? cmd.Command}" +
+                               (string.IsNullOrWhiteSpace(message) ? "" : $": {message}"), LogLevel.Success);
                     else
                     {
                         AddLog($"  ✗ {cmd.Description ?? cmd.Command}: {message}", LogLevel.Error);
                         tweakOk = false;
+                        AddLog("  Remaining commands in this tweak were skipped after the failure.", LogLevel.Warning);
+                        break;
                     }
                 }
 
                 if (tweakOk) ok++; else fail++;
                 if (tweakOk) appliedIds.Add(tweak.Id);
                 if (tweak.RequiresRestart) anyRestart = true;
+                if (!tweakOk && tweak.Model.ExclusiveGroup == "Power plan")
+                {
+                    AddLog("Stopped: the power plan could not be activated. Later tweaks must not modify the wrong plan.", LogLevel.Error);
+                    break;
+                }
             }
 
             if (appliedIds.Count > 0)
@@ -369,8 +378,9 @@ public class MainViewModel : BaseViewModel
                 _appliedTweaksState.SaveAppliedTweakIds(persistedIds);
             }
 
-            AddLog($"Done. {ok} succeeded, {fail} failed.", fail > 0 ? LogLevel.Warning : LogLevel.Success);
-            StatusText = $"Complete: {ok} succeeded, {fail} failed.";
+            var skipped = selected.Count - ok - fail;
+            AddLog($"Done. {ok} succeeded, {fail} failed, {skipped} skipped.", fail > 0 ? LogLevel.Warning : LogLevel.Success);
+            StatusText = $"Complete: {ok} succeeded, {fail} failed, {skipped} skipped.";
             await RefreshTweakStatesAsync(silent: true);
 
             if (anyRestart)
@@ -411,32 +421,6 @@ public class MainViewModel : BaseViewModel
         {
             IsApplying = false;
         }
-    }
-
-    private static List<string> FindConflicts(IEnumerable<TweakViewModel> tweaks)
-    {
-        var valuesByTarget = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-        foreach (var command in tweaks.SelectMany(tweak => tweak.Model.Commands))
-        {
-            string? target = null;
-            string? value = null;
-            var parts = command.Command.Split('|');
-            if (command.Type == CommandType.Registry && parts.Length >= 4)
-            {
-                target = $"{parts[0]}\\{parts[1]}";
-                value = $"{parts[2]}|{parts[3]}";
-            }
-            else if (command.Type == CommandType.Service && parts.Length >= 2)
-            {
-                target = $"Service:{parts[0]}";
-                value = parts[1];
-            }
-            if (target is null || value is null) continue;
-            if (!valuesByTarget.TryGetValue(target, out var values))
-                valuesByTarget[target] = values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            values.Add(value);
-        }
-        return valuesByTarget.Where(pair => pair.Value.Count > 1).Select(pair => pair.Key).ToList();
     }
 
     private async Task RefreshTweakStatesAsync() => await RefreshTweakStatesAsync(silent: false);

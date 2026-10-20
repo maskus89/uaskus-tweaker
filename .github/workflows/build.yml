@@ -1,6 +1,8 @@
 name: Build and Release
 
 on:
+  pull_request:
+  workflow_dispatch:
   push:
     branches: [ main ]
     tags: [ 'v*' ]
@@ -23,6 +25,9 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore UaskusTweaks/UaskusTweaks.csproj
+
+      - name: Check catalog and command error handling (no system tweaks applied)
+        run: dotnet run --project tests/UaskusTweaks.Checks -c Release
 
       - name: Determine build version
         id: version
@@ -64,6 +69,18 @@ jobs:
           name: UaskusTweaks-exe
           path: publish/UaskusTweaks.exe
 
+      - name: Audit tweak availability without applying changes
+        shell: powershell
+        run: ./scripts/Test-Tweaks.ps1 -ExecutablePath ./publish/UaskusTweaks.exe -ReportPath ./tweak-audit.json
+        continue-on-error: true
+
+      - name: Upload read-only audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tweak-audit
+          path: tweak-audit.json
+
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
@@ -79,7 +96,7 @@ jobs:
           ### Features
           - Professional dark-themed graphical interface
           - One-click performance, privacy, and gaming optimizations
-          - 100+ Windows tweaks with descriptions and risk indicators
+          - 87 Windows tweaks with descriptions and risk indicators
           - Automatic system restore point creation before applying changes
           - Built-in logging and undo support
 

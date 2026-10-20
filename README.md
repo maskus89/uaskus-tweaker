@@ -7,7 +7,7 @@ A modern WPF GUI application for Windows 10/11 optimization — a professional r
 ## Features
 
 - Dark-themed graphical interface
-- 100+ Windows tweaks organized by category (Performance, Privacy, Gaming, and more)
+- 87 Windows tweaks organized by category (Performance, Privacy, Gaming, and more)
 - Risk indicators so you know which tweaks are safe vs. advanced
 - One-click presets: Gaming, Privacy, Max Performance, Extreme Performance
 - Automatic system restore point before applying any changes
@@ -47,6 +47,9 @@ Every push to `main` also produces a build artifact:
 5. Click the large **Apply selected changes** button (a restore point is created automatically)
 
 ## Build Locally
+
+For the catalog audit, known limitations, read-only checks, and the disposable-Windows
+execution runner, see [Tweak audit and test instructions](docs/TWEAK-AUDIT.md).
 
 ### Prerequisites
 

@@ -14,6 +14,9 @@ public class TweakExecutorService
     {
         try
         {
+            var validationError = TweakCatalogValidator.ValidateCommand(command);
+            if (validationError is not null)
+                return (false, validationError);
             return command.Type switch
             {
                 CommandType.Registry => ExecuteRegistry(command),
@@ -43,20 +46,16 @@ public class TweakExecutorService
         var rawValue = parts[2];
         var kindStr = parts[3];
 
-        if (!Enum.TryParse<RegistryValueKind>(kindStr, out var kind))
-            kind = RegistryValueKind.DWord;
+        if (!Enum.TryParse<RegistryValueKind>(kindStr, out var kind) || !Enum.IsDefined(kind))
+            return (false, $"Invalid registry value kind: {kindStr}");
 
         object value;
         try
         {
             value = kind switch
             {
-                RegistryValueKind.DWord => int.TryParse(rawValue, out var iv) ? iv
-                    : int.TryParse(rawValue, System.Globalization.NumberStyles.HexNumber, null, out var hiv) ? hiv
-                    : Convert.ToInt32(rawValue, 16),
-                RegistryValueKind.QWord => long.TryParse(rawValue, out var lv) ? lv
-                    : long.TryParse(rawValue, System.Globalization.NumberStyles.HexNumber, null, out var hlv) ? hlv
-                    : Convert.ToInt64(rawValue, 16),
+                RegistryValueKind.DWord => int.Parse(rawValue, System.Globalization.CultureInfo.InvariantCulture),
+                RegistryValueKind.QWord => long.Parse(rawValue, System.Globalization.CultureInfo.InvariantCulture),
                 RegistryValueKind.Binary => Convert.FromBase64String(rawValue),
                 RegistryValueKind.String => rawValue,
                 RegistryValueKind.ExpandString => rawValue,
@@ -82,6 +81,10 @@ public class TweakExecutorService
 
         var svcName = parts[0];
         var startType = parts[1]; // demand, disabled, auto
+        using var serviceKey = Registry.LocalMachine.OpenSubKey(
+            $@"SYSTEM\CurrentControlSet\Services\{svcName}");
+        if (serviceKey is null)
+            return (false, $"Service '{svcName}' is not installed on this Windows installation.");
 
         // Map to sc.exe start type names
         var scType = startType.ToLowerInvariant() switch
@@ -101,7 +104,9 @@ public class TweakExecutorService
         {
             // Stop first, then disable
             var stopResult = await ExecuteProcessAsync("sc.exe", $"stop {svcName}");
-            // Ignore stop failure (service may already be stopped)
+            // sc.exe uses 1062 for an already stopped service. Other errors matter.
+            if (!stopResult.Item1 && !stopResult.Item2.Contains("code 1062:"))
+                return (false, $"Could not stop {svcName}: {stopResult.Item2}");
             var configResult = await ExecuteProcessAsync("sc.exe", $"config {svcName} start= disabled");
             ok = configResult.Item1;
             sb.AppendLine(configResult.Item2);
@@ -116,30 +121,8 @@ public class TweakExecutorService
         return (ok, sb.ToString().Trim());
     }
 
-    private static async Task<(bool, string)> ExecuteProcessAsync(string exe, string args)
-    {
-        try
-        {
-            var psi = new ProcessStartInfo(exe, args)
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                StandardOutputEncoding = Encoding.UTF8
-            };
-            using var proc = Process.Start(psi)!;
-            var stdout = await proc.StandardOutput.ReadToEndAsync();
-            var stderr = await proc.StandardError.ReadToEndAsync();
-            await proc.WaitForExitAsync();
-            var combined = $"{stdout}{stderr}".Trim();
-            return (proc.ExitCode == 0, combined);
-        }
-        catch (Exception ex)
-        {
-            return (false, ex.Message);
-        }
-    }
+    private static Task<(bool, string)> ExecuteProcessAsync(string exe, string args) =>
+        ProcessRunner.RunAsync(new ProcessStartInfo(exe, args));
 
     private static async Task<(bool, string)> ExecuteShellCommandAsync(string command)
     {

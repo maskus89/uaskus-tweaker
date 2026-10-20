@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../UaskusTweaks/Models/*.cs" Link="Models/%(Filename)%(Extension)" />
+    <Compile Include="../../UaskusTweaks/Services/ProcessRunner.cs" Link="Services/ProcessRunner.cs" />
+    <Compile Include="../../UaskusTweaks/Services/PowerShellService.cs" Link="Services/PowerShellService.cs" />
+    <Compile Include="../../UaskusTweaks/Services/TweakDefinitions.cs" Link="Services/TweakDefinitions.cs" />
+    <Compile Include="../../UaskusTweaks/Services/TweakCatalogValidator.cs" Link="Services/TweakCatalogValidator.cs" />
+    <Compile Include="../../UaskusTweaks/Services/TweakSelectionValidator.cs" Link="Services/TweakSelectionValidator.cs" />
+    <Compile Include="../../UaskusTweaks/Services/TweakExecutorService.cs" Link="Services/TweakExecutorService.cs" />
+    <Compile Include="../../UaskusTweaks/Services/TweakStateDetector.cs" Link="Services/TweakStateDetector.cs" />
+    <Compile Include="../../UaskusTweaks/Services/RegistryService.cs" Link="Services/RegistryService.cs" />
+    <None Include="../../UaskusTweaks/ViewModels/MainViewModel.cs" Link="MainViewModel.source" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

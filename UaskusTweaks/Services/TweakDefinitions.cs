@@ -11,7 +11,7 @@ file record RegCmd(string Path, string Name, object Value, RegistryValueKind Kin
         => new()
         {
             Type = CommandType.Registry,
-            Command = $"{Path}|{Name}|{Value}|{Kind}",
+            Command = $"{Path}|{Name}|{Convert.ToString(Value, System.Globalization.CultureInfo.InvariantCulture)}|{Kind}",
             Description = $"Set {Path}\\{Name} = {Value}"
         };
 }
@@ -42,8 +42,8 @@ public static class TweakDefinitions
         new[]
         {
             Tweak("essential_telemetry", "Disable Telemetry",
-                "Stops Microsoft from collecting usage data and diagnostics.",
-                "Disabling telemetry reduces background CPU/network usage and improves privacy. Sets AllowTelemetry to 0 in both HKLM policy locations.",
+                "Requests the lowest diagnostic-data level supported by your Windows edition.",
+                "Sets AllowTelemetry to 0. Windows editions that do not support disabling diagnostic data may still send required data.",
                 RiskLevel.Low, true, false,
                 Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection", "AllowTelemetry", 0),
                 Reg("HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\DataCollection", "AllowTelemetry", 0)),
@@ -71,7 +71,7 @@ public static class TweakDefinitions
             Tweak("essential_hibernate", "Disable Hibernation",
                 "Removes the hiberfil.sys file and disables hibernate.",
                 "Frees disk space used by hibernation file (usually equal to installed RAM). Run 'powercfg -h on' to re-enable.",
-                RiskLevel.Low, false, false,
+                RiskLevel.Low, true, false,
                 Cmd("powercfg -h off")),
 
             Tweak("essential_location", "Disable Location Tracking",
@@ -83,7 +83,7 @@ public static class TweakDefinitions
             Tweak("essential_pstelemetry", "Disable PowerShell Telemetry",
                 "Opts out of PowerShell usage telemetry.",
                 "Sets the POWERSHELL_TELEMETRY_OPTOUT environment variable system-wide.",
-                RiskLevel.Low, false, false,
+                RiskLevel.Low, true, false,
                 Cmd("setx POWERSHELL_TELEMETRY_OPTOUT 1 /M")),
 
             Tweak("essential_storagesense", "Disable Storage Sense",
@@ -101,20 +101,8 @@ public static class TweakDefinitions
             Tweak("essential_ipv4", "Prefer IPv4 over IPv6",
                 "Configures Windows to prefer IPv4 connections.",
                 "Sets DisabledComponents to 32 which makes Windows prefer IPv4 but keeps IPv6 functional.",
-                RiskLevel.Low, true, false,
+                RiskLevel.Low, true, true,
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters", "DisabledComponents", 32)),
-
-            Tweak("essential_services", "Set Bloat Services to Manual",
-                "Reduces startup overhead by setting unnecessary services to manual start.",
-                "Services: DiagTrack, dmwappushservice, SysMain, WSearch, XblAuthManager, XblGameSave, XboxNetApiSvc set to demand start.",
-                RiskLevel.Low, true, false,
-                Svc("DiagTrack", "demand"),
-                Svc("dmwappushservice", "demand"),
-                Svc("SysMain", "demand"),
-                Svc("WSearch", "demand"),
-                Svc("XblAuthManager", "demand"),
-                Svc("XblGameSave", "demand"),
-                Svc("XboxNetApiSvc", "demand")),
 
             Tweak("essential_edge", "Debloat Microsoft Edge",
                 "Disables Edge startup boost and background running.",
@@ -139,7 +127,7 @@ public static class TweakDefinitions
             Tweak("adv_ipv6_disable", "Completely Disable IPv6",
                 "Fully disables IPv6 on all adapters.",
                 "Sets DisabledComponents to 255 to disable all IPv6 components. Only do this if you don't use IPv6.",
-                RiskLevel.Medium, true, false,
+                RiskLevel.Medium, true, true,
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters", "DisabledComponents", 255)),
 
             Tweak("adv_notifications", "Disable Notification Tray",
@@ -172,16 +160,21 @@ public static class TweakDefinitions
         {
             Tweak("perf_power_ultimate", "Enable Ultimate Performance Power Plan",
                 "Activates the hidden Ultimate Performance power plan.",
-                "Duplicates and activates the Ultimate Performance scheme which disables all power saving features.",
+                "Creates a reusable Ultimate Performance plan and activates it. Availability depends on the device's power-management support.",
                 RiskLevel.Low, true, false,
-                Cmd("powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61"),
-                Cmd("powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61")),
+                PS("$id = '6f2b91d2-48e5-4ea5-bb7e-34fce4656c81'; " +
+                   "$plans = powercfg.exe /list; if ($LASTEXITCODE -ne 0) { throw 'Could not list power plans.' }; " +
+                   "if (($plans -join \"`n\") -notmatch $id) { " +
+                   "powercfg.exe /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 $id; " +
+                   "if ($LASTEXITCODE -ne 0) { throw 'Ultimate Performance is unavailable on this device.' } }; " +
+                   "powercfg.exe /setactive $id; if ($LASTEXITCODE -ne 0) { throw 'Could not activate Ultimate Performance.' }")),
 
             Tweak("perf_core_parking", "Disable CPU Core Parking",
-                "Keeps all CPU cores active at all times.",
-                "Sets ValueMax to 0 for core parking, preventing Windows from parking cores during light load.",
+                "Disables core parking in the active plan while plugged in.",
+                "Sets the minimum unparked cores to 100% on AC power. This increases power consumption and depends on processor support.",
                 RiskLevel.Low, true, false,
-                Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerSettings\\54533251-82be-4824-96c1-47b60b740d00\\0cc5b647-c1df-4637-891a-dec35c318583", "ValueMax", 0)),
+                Cmd("powercfg /setacvalueindex scheme_current sub_processor 0cc5b647-c1df-4637-891a-dec35c318583 100"),
+                Cmd("powercfg /setactive scheme_current")),
 
             Tweak("perf_cpu_throttle", "Disable CPU Throttling",
                 "Prevents Windows from throttling CPU performance.",
@@ -205,7 +198,7 @@ public static class TweakDefinitions
             Tweak("perf_gpu_sched", "Enable Hardware GPU Scheduling",
                 "Enables WDDM 2.7 hardware-accelerated GPU scheduling.",
                 "Reduces latency between CPU and GPU by letting the GPU manage its own memory. Requires a supported GPU and driver.",
-                RiskLevel.Low, true, false,
+                RiskLevel.Low, true, true,
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers", "HwSchMode", 2)),
 
             Tweak("perf_visual_effects", "Disable All Visual Effects",
@@ -239,7 +232,7 @@ public static class TweakDefinitions
             Tweak("perf_paging_exec", "Disable Paging Executive",
                 "Keeps kernel drivers in RAM, not on disk.",
                 "DisablePagingExecutive=1 prevents the kernel and drivers from being paged to disk, improving responsiveness but requiring adequate RAM.",
-                RiskLevel.Medium, true, false,
+                RiskLevel.Medium, true, true,
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management", "DisablePagingExecutive", 1)),
 
             Tweak("perf_responsiveness", "Optimize System Responsiveness",
@@ -265,12 +258,18 @@ public static class TweakDefinitions
                 "Disables Microsoft telemetry and compatibility scheduled tasks.",
                 "Disables tasks: Microsoft Compatibility Appraiser, ProgramDataUpdater, Autochk\\Proxy, CEIP tasks, DiskDiagnostic.",
                 RiskLevel.Low, true, false,
-                PS("schtasks /Change /TN \"Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser\" /DISABLE 2>$null; " +
-                   "schtasks /Change /TN \"Microsoft\\Windows\\Application Experience\\ProgramDataUpdater\" /DISABLE 2>$null; " +
-                   "schtasks /Change /TN \"Microsoft\\Windows\\Autochk\\Proxy\" /DISABLE 2>$null; " +
-                   "schtasks /Change /TN \"Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator\" /DISABLE 2>$null; " +
-                   "schtasks /Change /TN \"Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip\" /DISABLE 2>$null; " +
-                   "schtasks /Change /TN \"Microsoft\\Windows\\DiskDiagnostic\\Microsoft-Windows-DiskDiagnosticDataCollector\" /DISABLE 2>$null"))
+                PS("$targets = @(" +
+                   "'\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser'," +
+                   "'\\Microsoft\\Windows\\Application Experience\\ProgramDataUpdater'," +
+                   "'\\Microsoft\\Windows\\Autochk\\Proxy'," +
+                   "'\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator'," +
+                   "'\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip'," +
+                   "'\\Microsoft\\Windows\\DiskDiagnostic\\Microsoft-Windows-DiskDiagnosticDataCollector'); " +
+                   "$tasks = @(Get-ScheduledTask -ErrorAction Stop); " +
+                   "foreach ($target in $targets) { " +
+                   "$task = @($tasks | Where-Object { ($_.TaskPath + $_.TaskName) -eq $target }); " +
+                   "if ($task.Count -eq 0) { Write-Output \"Not installed: $target\"; continue }; " +
+                   "$task | Disable-ScheduledTask -ErrorAction Stop | Out-Null; Write-Output \"Disabled: $target\" }"))
         });
 
     // ─── PRIVACY ──────────────────────────────────────────────────────────────
@@ -317,12 +316,6 @@ public static class TweakDefinitions
                 RiskLevel.Low, false, false,
                 Reg("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 0)),
 
-            Tweak("priv_diagdata", "Disable Diagnostic Data",
-                "Prevents diagnostic data from being sent to Microsoft.",
-                "Sets AllowDiagnosticData=0 via policy, stopping all diagnostic telemetry uploads.",
-                RiskLevel.Low, true, false,
-                Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection", "AllowDiagnosticData", 0)),
-
             Tweak("priv_errorreporting", "Disable Error Reporting",
                 "Prevents crash dumps from being sent to Microsoft.",
                 "Disables Windows Error Reporting service and sets the Disabled policy key.",
@@ -347,7 +340,7 @@ public static class TweakDefinitions
             Tweak("game_dvr_bar", "Disable Game DVR / GameBar",
                 "Removes the Xbox overlay and background recording.",
                 "GameBar and DVR consume GPU memory and CPU cycles. Disabling them is standard for competitive gaming.",
-                RiskLevel.Low, false, false,
+                RiskLevel.Low, true, false,
                 Reg("HKCU\\System\\GameConfigStore", "GameDVR_Enabled", 0),
                 Reg("HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR", "AllowGameDVR", 0),
                 Reg("HKCU\\Software\\Microsoft\\GameBar", "UseNexusForGameBarEnabled", 0)),
@@ -393,14 +386,11 @@ public static class TweakDefinitions
                 RiskLevel.Low, true, false,
                 Cmd("ipconfig /flushdns")),
 
-            Tweak("net_tcp_optimize", "Optimize TCP Settings",
-                "Enables auto-tuning, chimney, and other TCP optimizations.",
-                "Applies netsh commands to enable TCP autotuning, chimney offload, DCA, and NetDMA for better throughput.",
+            Tweak("net_tcp_optimize", "Enable TCP Receive Auto-Tuning",
+                "Restores normal TCP receive-window auto-tuning.",
+                "Lets Windows adjust the TCP receive window. Obsolete chimney, DCA, and NetDMA switches are not used.",
                 RiskLevel.Low, true, false,
-                NetSh("int tcp set global autotuninglevel=normal"),
-                NetSh("int tcp set global chimney=enabled"),
-                NetSh("int tcp set global dca=enabled"),
-                NetSh("int tcp set global netdma=enabled")),
+                NetSh("int tcp set global autotuninglevel=normal")),
 
             Tweak("net_tcp_timestamps", "Enable TCP Timestamps and RSS",
                 "Enables TCP timestamps and receive-side scaling.",
@@ -419,7 +409,8 @@ public static class TweakDefinitions
                 "Switches the primary DNS to Cloudflare for faster lookups.",
                 "Configures the active network interface to use 1.1.1.1 (primary) and 1.0.0.1 (secondary).",
                 RiskLevel.Low, true, false,
-                PS("$adapters = Get-NetAdapter | Where-Object {$_.Status -eq 'Up'}; " +
+                PS("$adapters = @(Get-NetAdapter -ErrorAction Stop | Where-Object {$_.Status -eq 'Up'}); " +
+                   "if ($adapters.Count -eq 0) { throw 'No active network adapters were found.' }; " +
                    "foreach ($a in $adapters) { " +
                    "Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ServerAddresses ('1.1.1.1','1.0.0.1') " +
                    "}")),
@@ -545,7 +536,7 @@ public static class TweakDefinitions
             Tweak("cust_numlock", "Enable NumLock on Startup",
                 "Turns NumLock on automatically at login.",
                 "Sets InitialKeyboardIndicators=2 so NumLock is active on the login screen.",
-                RiskLevel.Low, false, false,
+                RiskLevel.Low, true, false,
                 Reg("HKU\\.DEFAULT\\Control Panel\\Keyboard", "InitialKeyboardIndicators", "2", RegistryValueKind.String)),
 
             Tweak("cust_mouse_accel", "Disable Mouse Acceleration",
@@ -573,7 +564,12 @@ public static class TweakDefinitions
                 "Returns the platform-clock setting to the Windows default.",
                 "Deletes only the useplatformclock boot override. Windows will choose the appropriate timer; this is not a universal performance tweak.",
                 RiskLevel.Medium, true, true,
-                Bcd("/deletevalue useplatformclock")),
+                PS("$entry = bcdedit.exe /enum '{current}'; " +
+                   "if ($LASTEXITCODE -ne 0) { throw 'Could not read the current boot entry.' }; " +
+                   "if (($entry -join \"`n\") -match '(?m)^\\s*useplatformclock\\s') { " +
+                   "bcdedit.exe /deletevalue '{current}' useplatformclock; " +
+                   "if ($LASTEXITCODE -ne 0) { throw 'Could not remove the platform-clock override.' } " +
+                   "} else { Write-Output 'Already using the default platform-clock setting.' }")),
 
             Tweak("ext_dynamictick", "Disable Dynamic Tick",
                 "Forces a fixed timer interrupt rate.",
@@ -602,21 +598,23 @@ public static class TweakDefinitions
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\nvlddmkm\\Global\\NvTweak", "NvCplEnableHWAPI", 0),
                 Reg("HKLM\\SYSTEM\\CurrentControlSet\\Services\\amdkmpfd\\Parameters", "TelemetryEnabled", 0)),
 
-            Tweak("ext_pagefile", "Optimize Page File",
-                "Sets a fixed-size page file for predictable performance.",
-                "A fixed page file prevents resize overhead. 4096-8192 MB is recommended. PowerShell sets the fixed size on C:.",
-                RiskLevel.Low, true, false,
-                PS("$cs = Get-WmiObject -Class Win32_ComputerSystem; " +
-                   "$cs.AutomaticManagedPagefile = $False; $cs.Put() | Out-Null; " +
-                   "$pf = Get-WmiObject -Class Win32_PageFileSetting; " +
-                   "if ($pf) { $pf.InitialSize = 4096; $pf.MaximumSize = 8192; $pf.Put() | Out-Null } " +
-                   "else { Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{Name='C:\\pagefile.sys';InitialSize=4096;MaximumSize=8192} | Out-Null }")),
-
-            Tweak("ext_cstates", "Disable C-States (CPU Idle States)",
-                "Prevents the CPU from entering deep sleep states. Requires restart.",
-                "disablecpuidle=1 keeps the CPU in C0 at all times, eliminating wake latency at the cost of higher power consumption.",
+            Tweak("ext_pagefile", "Set Custom Page File Size",
+                "Sets a 4096–8192 MB page file on the Windows drive. Requires restart.",
+                "Disables automatic page-file management. This range is not a fixed size and may be too small for some workloads or crash dumps. Other page files are left unchanged.",
                 RiskLevel.High, true, true,
-                Bcd("/set disablecpuidle 1"))
+                PS("$cs = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop; " +
+                   "$name = $env:SystemDrive + '\\pagefile.sys'; " +
+                   "$pf = @(Get-CimInstance -ClassName Win32_PageFileSetting -ErrorAction Stop | Where-Object { $_.Name -eq $name }); " +
+                   "$cs | Set-CimInstance -Property @{AutomaticManagedPagefile=$false} -ErrorAction Stop; " +
+                   "if ($pf.Count -gt 0) { $pf | Set-CimInstance -Property @{InitialSize=[uint32]4096;MaximumSize=[uint32]8192} -ErrorAction Stop } " +
+                   "else { New-CimInstance -ClassName Win32_PageFileSetting -Property @{Name=$name;InitialSize=[uint32]4096;MaximumSize=[uint32]8192} -ErrorAction Stop | Out-Null }")),
+
+            Tweak("ext_cstates", "Disable Processor Idle on AC Power",
+                "Disables processor idle in the active power plan while plugged in.",
+                "Sets the processor IDLEDISABLE power setting. This increases heat and power consumption; hardware and firmware may limit its effect.",
+                RiskLevel.High, true, false,
+                Cmd("powercfg /setacvalueindex scheme_current sub_processor 5d76a2ca-e8c0-402f-a133-2158492d58ad 1"),
+                Cmd("powercfg /setactive scheme_current"))
         });
 
     // ─── Builder helpers ──────────────────────────────────────────────────────
@@ -625,7 +623,11 @@ public static class TweakDefinitions
         IEnumerable<TweakViewModel> tweaks)
     {
         var cat = new TweakCategoryViewModel { Name = name, Description = description, Icon = icon };
-        foreach (var t in tweaks) cat.Tweaks.Add(t);
+        foreach (var t in tweaks)
+        {
+            t.Model.Category = name;
+            cat.Tweaks.Add(t);
+        }
         cat.NotifyCounts();
         return cat;
     }
@@ -642,7 +644,9 @@ public static class TweakDefinitions
             Tooltip = tooltip,
             RiskLevel = risk,
             IsAdminRequired = adminRequired,
-            RequiresRestart = requiresRestart
+            RequiresRestart = requiresRestart,
+            ExclusiveGroup = id is "perf_power_ultimate" or "game_power" ? "Power plan" : null,
+            ApplyOrder = id is "perf_power_ultimate" or "game_power" ? -100 : 0
         };
         model.Commands.AddRange(commands);
         return new TweakViewModel(model);
@@ -653,9 +657,11 @@ public static class TweakDefinitions
     {
         return Tweak(id, name,
             $"Removes the {name.Replace("Remove ", "")} built-in app.",
-            $"Uses Get-AppxPackage {package} | Remove-AppxPackage -ErrorAction SilentlyContinue to remove packages safely, skipping any that fail.",
+            "Removes matching packages for the current user. Missing packages are already removed; protected packages and other removal errors are reported.",
             risk, true, false,
-            PS($"Get-AppxPackage {package} -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue"));
+            PS($"$packages = @(Get-AppxPackage '{package}' -ErrorAction Stop); " +
+               "if ($packages.Count -eq 0) { Write-Output 'Already removed: no matching packages installed.' } " +
+               "else { $packages | Remove-AppxPackage -ErrorAction Stop }"));
     }
 
     private static TweakCommand Reg(string path, string name, object value,
@@ -665,7 +671,7 @@ public static class TweakDefinitions
         if (value is byte[] bytes)
             valStr = Convert.ToBase64String(bytes);
         else
-            valStr = value?.ToString() ?? string.Empty;
+            valStr = Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
 
         return new TweakCommand
         {
